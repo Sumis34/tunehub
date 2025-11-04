@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ScreenSaverRouteImport } from './routes/screen-saver'
+import { Route as RadioRouteImport } from './routes/radio'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 
 const ScreenSaverRoute = ScreenSaverRouteImport.update({
   id: '/screen-saver',
   path: '/screen-saver',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RadioRoute = RadioRouteImport.update({
+  id: '/radio',
+  path: '/radio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -32,30 +38,34 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/radio': typeof RadioRoute
   '/screen-saver': typeof ScreenSaverRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/radio': typeof RadioRoute
   '/screen-saver': typeof ScreenSaverRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/radio': typeof RadioRoute
   '/screen-saver': typeof ScreenSaverRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/screen-saver'
+  fullPaths: '/' | '/about' | '/radio' | '/screen-saver'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/screen-saver'
-  id: '__root__' | '/' | '/about' | '/screen-saver'
+  to: '/' | '/about' | '/radio' | '/screen-saver'
+  id: '__root__' | '/' | '/about' | '/radio' | '/screen-saver'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  RadioRoute: typeof RadioRoute
   ScreenSaverRoute: typeof ScreenSaverRoute
 }
 
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/screen-saver'
       fullPath: '/screen-saver'
       preLoaderRoute: typeof ScreenSaverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/radio': {
+      id: '/radio'
+      path: '/radio'
+      fullPath: '/radio'
+      preLoaderRoute: typeof RadioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  RadioRoute: RadioRoute,
   ScreenSaverRoute: ScreenSaverRoute,
 }
 export const routeTree = rootRouteImport
