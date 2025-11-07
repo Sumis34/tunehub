@@ -1,0 +1,9 @@
+{
+  "name": "@repo/server",
+  "scripts": {
+    "dev": ".\\.venv\\Scripts\\python.exe -m uvicorn main:app --reload",
+    "create-venv": "python3 -m venv .venv",
+    "setup": ".\\.venv\\Scripts\\python.exe -m pip install -r requirements.txt",
+    "freeze": ".\\.venv\\Scripts\\python.exe -m pip freeze > requirements.txt"
+  }
+}
