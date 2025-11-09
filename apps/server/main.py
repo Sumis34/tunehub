@@ -1,5 +1,3 @@
-# server.py
-import asyncio
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from typing import Any, Dict, List
@@ -45,7 +43,6 @@ async def websocket_endpoint(ws: WebSocket):
             msg = await ws.receive_json()
             action = Action(**msg)  # validate
             print(f"Received action: {action}")
-
             # handle action
             if action.type == "ping":
                 await manager.send_event(Event(type="pong", data={}), ws)
@@ -56,3 +53,7 @@ async def websocket_endpoint(ws: WebSocket):
     except WebSocketDisconnect:
         manager.disconnect(ws)
         print("Client disconnected")
+
+@app.get("/")
+async def root():
+    return {"message": "TuneHub Server is running"}
