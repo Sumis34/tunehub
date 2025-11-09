@@ -7,5 +7,10 @@
 	},
 	"devDependencies": {
 		"turbo": "^2.6.0"
+	},
+	"pnpm": {
+		"overrides": {
+			"vite": "npm:rolldown-vite@7.1.14"
+		}
 	}
 }
