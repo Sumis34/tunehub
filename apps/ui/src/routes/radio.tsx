@@ -33,11 +33,15 @@ function RouteComponent() {
     });
   }, [fac, imgRef]);
 
-  const gradient = `linear-gradient(180deg, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 0.6) 0%, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 0) 100%)`;
+  const gradient = `linear-gradient(180deg, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 0.8) 0%, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 0) 100%)`;
 
   return (
-    <div className="h-screen w-screen bg-black">
-      <div className="h-full w-full flex justify-center text-white flex-col relative bg-neutral-950 rounded-3xl overflow-hidden">
+    <div className="h-screen w-screen bg-black flex flex-col">
+      <div className="text-sm text-white/70 font-medium py-1 grid grid-cols-3 px-5">
+        <p>13°</p>
+        <p className="text-center">19:24</p>
+      </div>
+      <div className="flex justify-center text-white flex-col grow relative bg-neutral-950 rounded-xl overflow-hidden">
         <div className="z-10 flex justify-between">
           <div className="grid grid-cols-1 grid-rows-3 gap-10 w-24">
             {favorites.slice(0, 3).map((favorite) => (
@@ -73,11 +77,6 @@ function RouteComponent() {
             background: dominantColor ? gradient : "transparent",
           }}
         ></div>
-        <div className="absolute top-0 left-0 right-0 flex justify-center">
-          <div className="w-36 bg-black rounded-b-lg">
-            <p className="text-sm text-center text-white/50 py-0.5">19:24</p>
-          </div>
-        </div>
       </div>
     </div>
   );
