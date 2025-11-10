@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { FastAverageColor } from "fast-average-color";
 import { useEffect, useRef, useState } from "react";
+import ColorThief from "colorthief";
 
 export const Route = createFileRoute("/radio")({
   component: RouteComponent,
@@ -18,22 +18,20 @@ const favorites = [
 ];
 
 function RouteComponent() {
-  const [dominantColor, setDominantColor] = useState<string | null>(null);
   const [dominantColorValues, setDominantColorValues] = useState<
     number[] | null
   >(null);
-  const fac = new FastAverageColor();
 
   const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
-    fac.getColorAsync(imgRef.current!).then((color) => {
-      setDominantColor(color.rgba);
-      setDominantColorValues(color.value);
-    });
-  }, [fac, imgRef]);
+    const colorThief = new ColorThief();
+    const c = colorThief.getColor(imgRef.current!);
+    setDominantColorValues(c);
+  }, [imgRef]);
 
-  const gradient = `linear-gradient(180deg, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 0.8) 0%, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 0) 100%)`;
+  const gradient = `linear-gradient(180deg, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 1) 0%, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 0) 100%)`;
+  const shadow = `0px 0px 50px 10px rgba(${dominantColorValues?.slice(0, 3).join(",")},0.5)`;
 
   return (
     <div className="h-screen w-screen bg-black flex flex-col">
@@ -53,10 +51,14 @@ function RouteComponent() {
           <div>
             <img
               ref={imgRef}
-              src="https://i.ebayimg.com/images/g/pVkAAOSwKmZhoXM7/s-l1200.jpg"
+              src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b7/NirvanaNevermindalbumcover.jpg/250px-NirvanaNevermindalbumcover.jpg"
+              // src="https://i.ebayimg.com/images/g/pVkAAOSwKmZhoXM7/s-l1200.jpg"
               alt="cover art"
               className="rounded-md w-60 aspect-square"
               crossOrigin="anonymous"
+              style={{
+                boxShadow: shadow,
+              }}
             />
             <div className="mt-4 text-center">
               <h1 className="text-2xl font-bold">{title}</h1>
@@ -74,9 +76,14 @@ function RouteComponent() {
         <div
           className="absolute inset-0 z-0"
           style={{
-            background: dominantColor ? gradient : "transparent",
+            background: dominantColorValues ? gradient : "transparent",
           }}
         ></div>
+        <img
+          src="/noiseTexture.png"
+          className="absolute inset-0 mix-blend-multiply"
+          alt="noise texture"
+        />
       </div>
     </div>
   );

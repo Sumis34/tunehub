@@ -13,6 +13,7 @@
     "@tailwindcss/vite": "^4.1.16",
     "@tanstack/react-router": "^1.134.12",
     "@tanstack/react-router-devtools": "^1.134.12",
+    "colorthief": "^2.6.0",
     "fast-average-color": "^9.5.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -21,6 +22,7 @@
   "devDependencies": {
     "@eslint/js": "^9.36.0",
     "@tanstack/router-plugin": "^1.134.12",
+    "@types/colorthief": "^2.6.0",
     "@types/node": "^24.6.0",
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
