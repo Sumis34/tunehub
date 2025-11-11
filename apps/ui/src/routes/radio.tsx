@@ -81,7 +81,7 @@ function RouteComponent() {
         ></div>
         <img
           src="/noiseTexture.png"
-          className="absolute inset-0 mix-blend-multiply"
+          className="absolute inset-0 mix-blend-multiply w-full h-full object-cover"
           alt="noise texture"
         />
       </div>
