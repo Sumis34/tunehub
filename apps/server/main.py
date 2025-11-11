@@ -34,10 +34,15 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 
+state = {
+    "volume": 50,
+}
+
 # WebSocket endpoint
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):
     await manager.connect(ws)
+    await manager.send_event(Event(type="adjust-volume", data={"volume": state["volume"]}), ws)
     try:
         while True:
             msg = await ws.receive_json()
@@ -48,6 +53,13 @@ async def websocket_endpoint(ws: WebSocket):
                 await manager.send_event(Event(type="pong", data={}), ws)
             elif action.type == "echo":
                 await manager.send_event(Event(type="echo", data={"message": action.data.get("message")}), ws)
+            elif action.type == "adjust-volume":
+                new_volume = action.data.get("volume")
+                if isinstance(new_volume, int) and 0 <= new_volume <= 100:
+                    state["volume"] = new_volume
+                else:
+                    await manager.send_event(Event(type="error", data={"message": "Invalid volume"}), ws)
+                
             else:
                 await manager.send_event(Event(type="error", data={"message": "Unknown action"}), ws)
     except WebSocketDisconnect:

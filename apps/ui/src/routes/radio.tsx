@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import ColorThief from "colorthief";
 import useWeather from "../hooks/use-weather";
+import { useEvent } from "../hooks/use-event";
+import { ReadyState } from "react-use-websocket";
 
 const locale = import.meta.env.VITE_LOCALE || "de-CH";
 
@@ -51,6 +53,16 @@ function RouteComponent() {
     setDominantColorValues(c);
   }, [imgRef]);
 
+  const [volume, setVolume, readyState] = useEvent("adjust-volume");
+
+  const connectionStatus = {
+    [ReadyState.CONNECTING]: "Connecting",
+    [ReadyState.OPEN]: "Open",
+    [ReadyState.CLOSING]: "Closing",
+    [ReadyState.CLOSED]: "Closed",
+    [ReadyState.UNINSTANTIATED]: "Uninstantiated",
+  }[readyState];
+
   const gradient = `linear-gradient(180deg, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 1) 0%, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 0) 100%)`;
   const shadow = `0px 0px 50px 10px rgba(${dominantColorValues?.slice(0, 3).join(",")},0.5)`;
 
@@ -59,12 +71,21 @@ function RouteComponent() {
       <div className="text-sm text-white/70 font-medium py-1 grid grid-cols-3 px-5">
         <p>{temperature ? `${temperature}°` : ""}</p>
         <p className="text-center">{shortTimeFormatter.format(time)}</p>
+        <p className="text-right">{connectionStatus} {JSON.stringify(volume)}</p>
       </div>
       <div className="flex justify-center text-white flex-col grow relative bg-neutral-950 rounded-xl overflow-hidden">
         <div className="z-10 flex justify-between">
           <div className="grid grid-cols-1 grid-rows-3 gap-10 w-24">
             {favorites.slice(0, 3).map((favorite) => (
-              <button className="bg-neutral-900 px-5 py-4 rounded-r-lg active:bg-neutral-800 truncate font-medium text-white/80 transition-all border-2 border-neutral-800">
+              <button
+                onClick={() =>
+                  setVolume({
+                    volume: (Math.random() * 100) | 0,
+                  })
+                }
+                key={favorite.id}
+                className="bg-neutral-900 px-5 py-4 rounded-r-lg active:bg-neutral-800 truncate font-medium text-white/80 transition-all border-2 border-neutral-800"
+              >
                 {favorite.name}
               </button>
             ))}
@@ -88,7 +109,10 @@ function RouteComponent() {
           </div>
           <div className="grid grid-cols-1 grid-rows-3 gap-10 w-24">
             {favorites.slice(3, 6).map((favorite) => (
-              <button className="bg-neutral-900 px-5 py-4 rounded-l-lg active:bg-neutral-800 truncate font-medium text-white/80 transition-all border-2 border-neutral-800">
+              <button
+                key={favorite.id}
+                className="bg-neutral-900 px-5 py-4 rounded-l-lg active:bg-neutral-800 truncate font-medium text-white/80 transition-all border-2 border-neutral-800"
+              >
                 {favorite.name}
               </button>
             ))}
