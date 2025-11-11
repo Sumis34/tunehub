@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import ColorThief from "colorthief";
+import useWeather from "../hooks/use-weather";
+
+const locale = import.meta.env.VITE_LOCALE || "de-CH";
 
 export const Route = createFileRoute("/radio")({
   component: RouteComponent,
@@ -21,12 +24,30 @@ function RouteComponent() {
   const [dominantColorValues, setDominantColorValues] = useState<
     number[] | null
   >(null);
+  const [time, setTime] = useState(new Date());
+
+  const { temperature } = useWeather(47.0274, 7.74526);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const shortTimeFormatter = new Intl.DateTimeFormat(locale, {
+    timeStyle: "short",
+  });
 
   const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
     const colorThief = new ColorThief();
-    const c = colorThief.getColor(imgRef.current!);
+    if (!imgRef.current?.complete) {
+      return;
+    }
+    const c = colorThief.getColor(imgRef.current);
     setDominantColorValues(c);
   }, [imgRef]);
 
@@ -34,10 +55,10 @@ function RouteComponent() {
   const shadow = `0px 0px 50px 10px rgba(${dominantColorValues?.slice(0, 3).join(",")},0.5)`;
 
   return (
-    <div className="h-screen w-screen bg-black flex flex-col">
+    <div className="h-full w-full bg-black flex flex-col">
       <div className="text-sm text-white/70 font-medium py-1 grid grid-cols-3 px-5">
-        <p>13°</p>
-        <p className="text-center">19:24</p>
+        <p>{temperature ? `${temperature}°` : ""}</p>
+        <p className="text-center">{shortTimeFormatter.format(time)}</p>
       </div>
       <div className="flex justify-center text-white flex-col grow relative bg-neutral-950 rounded-xl overflow-hidden">
         <div className="z-10 flex justify-between">

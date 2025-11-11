@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
-const locale = "de-CH";
+const locale = import.meta.env.VITE_LOCALE || "de-CH";
 
 export const Route = createFileRoute("/screen-saver")({
   component: RouteComponent,
