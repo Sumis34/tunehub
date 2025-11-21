@@ -9,11 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ScreenSaverRouteImport } from './routes/screen-saver'
 import { Route as RadioRouteImport } from './routes/radio'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ScreenSaverRoute = ScreenSaverRouteImport.update({
   id: '/screen-saver',
   path: '/screen-saver',
@@ -40,12 +46,14 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/radio': typeof RadioRoute
   '/screen-saver': typeof ScreenSaverRoute
+  '/settings': typeof SettingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/radio': typeof RadioRoute
   '/screen-saver': typeof ScreenSaverRoute
+  '/settings': typeof SettingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,14 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/radio': typeof RadioRoute
   '/screen-saver': typeof ScreenSaverRoute
+  '/settings': typeof SettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/radio' | '/screen-saver'
+  fullPaths: '/' | '/about' | '/radio' | '/screen-saver' | '/settings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/radio' | '/screen-saver'
-  id: '__root__' | '/' | '/about' | '/radio' | '/screen-saver'
+  to: '/' | '/about' | '/radio' | '/screen-saver' | '/settings'
+  id: '__root__' | '/' | '/about' | '/radio' | '/screen-saver' | '/settings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,10 +76,18 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   RadioRoute: typeof RadioRoute
   ScreenSaverRoute: typeof ScreenSaverRoute
+  SettingsRoute: typeof SettingsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/screen-saver': {
       id: '/screen-saver'
       path: '/screen-saver'
@@ -107,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   RadioRoute: RadioRoute,
   ScreenSaverRoute: ScreenSaverRoute,
+  SettingsRoute: SettingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
