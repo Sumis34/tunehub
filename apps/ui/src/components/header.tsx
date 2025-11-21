@@ -23,7 +23,7 @@ export default function Header() {
     timeStyle: "short",
   });
   return (
-    <div className="text-xl text-white/70 font-medium py-2 grid grid-cols-3 px-5">
+    <div className="text-xl text-white/70 font-medium py-2 grid grid-cols-3 px-5 bg-neutral-900">
       <p>{temperature ? `${temperature}°` : ""}</p>
       <p className="text-center">{shortTimeFormatter.format(time)}</p>
       <p className="flex justify-end items-center">

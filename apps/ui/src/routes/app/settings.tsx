@@ -24,13 +24,13 @@ function RouteComponent() {
   const [isPlaying] = useEvent<boolean>("is-playing", false);
 
   return (
-    <div className="h-full w-full bg-black flex flex-col">
+    <div className="h-full w-full flex flex-col bg-neutral-900">
       <Tabs.Root
         className="flex gap-2 grow"
         defaultValue="speaker"
         orientation="vertical"
       >
-        <Tabs.List className="relative z-0 flex flex-col gap-2 border-r-2">
+        <Tabs.List className="relative z-0 flex flex-col gap-2">
           <Tabs.Tab className="p-3 group" value="speaker">
             <Speaker className="stroke-white/70 w-12 h-12 group-data-selected:stroke-green-400 transition-all duration-200 ease-in-out" />
           </Tabs.Tab>
@@ -39,7 +39,7 @@ function RouteComponent() {
           </Tabs.Tab>
           <Tabs.Indicator className="absolute left-0 z-[-1] h-(--active-tab-height) w-1 translate-y-(--active-tab-top) rounded-r-sm bg-green-400 transition-all duration-200 ease-in-out" />
         </Tabs.List>
-        <div className="bg-neutral-900 rounded-tl-2xl grow p-5 overflow-y-auto">
+        <div className="bg-neutral-900 grow p-5 overflow-y-auto">
           <Tabs.Panel className="text-white" value="speaker">
             <h1 className="text-2xl font-bold">Speaker</h1>
             <div className="w-full flex bg-neutral-800 rounded-md mt-5 p-5 gap-3 items-center">
