@@ -1,14 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import ColorThief from "colorthief";
-import useWeather from "../hooks/use-weather";
-// import { useEvent } from "../hooks/use-event";
-// import { ReadyState } from "react-use-websocket";
-import { Settings2 } from "lucide-react";
 
-const locale = import.meta.env.VITE_LOCALE || "de-CH";
-
-export const Route = createFileRoute("/radio")({
+export const Route = createFileRoute("/app/radio")({
   component: RouteComponent,
 });
 
@@ -27,21 +21,6 @@ function RouteComponent() {
   const [dominantColorValues, setDominantColorValues] = useState<
     number[] | null
   >(null);
-  const [time, setTime] = useState(new Date());
-
-  const { temperature } = useWeather(47.0274, 7.74526);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const shortTimeFormatter = new Intl.DateTimeFormat(locale, {
-    timeStyle: "short",
-  });
 
   const imgRef = useRef<HTMLImageElement>(null);
 
@@ -69,15 +48,6 @@ function RouteComponent() {
 
   return (
     <div className="h-full w-full bg-black flex flex-col">
-      <div className="text-sm text-white/70 font-medium py-1 grid grid-cols-3 px-5">
-        <p>{temperature ? `${temperature}°` : ""}</p>
-        <p className="text-center">{shortTimeFormatter.format(time)}</p>
-        <p className="flex justify-end items-center">
-          <Link to="/settings">
-            <Settings2 className="w-4 h-4 stroke-white/70" />
-          </Link>
-        </p>
-      </div>
       <div className="flex justify-center text-white flex-col grow relative bg-neutral-950 rounded-xl overflow-hidden">
         <div className="z-10 flex justify-between">
           <div className="grid grid-cols-1 grid-rows-3 gap-10 w-24">
@@ -104,8 +74,8 @@ function RouteComponent() {
               }}
             />
             <div className="mt-4 text-center">
-              <h1 className="text-2xl font-bold">{title}</h1>
-              <h2 className="text-lg text-white/50">{description}</h2>
+              <h1 className="text-4xl font-bold">{title}</h1>
+              <h2 className="text-3xl text-white/50">{description}</h2>
             </div>
           </div>
           <div className="grid grid-cols-1 grid-rows-3 gap-10 w-24">

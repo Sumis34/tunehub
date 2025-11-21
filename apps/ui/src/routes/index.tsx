@@ -1,13 +1,13 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
 function Index() {
-  redirect({
-    "to": "/screen-saver",
-  });
+  const navigate = useNavigate({ from: "/" });
+
+  navigate({ to: "/screen-saver" });
 
   return (
     <div className="p-2">

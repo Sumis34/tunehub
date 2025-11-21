@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { MoveLeft, Speaker, Wifi } from "lucide-react";
 import { Tabs } from "@base-ui-components/react/tabs";
-import AudioBars from "../components/AudioBars";
-import { useEvent } from "../hooks/use-event";
-import type { Device } from "../types";
+import AudioBars from "../../components/AudioBars";
+import { useEvent } from "../../hooks/use-event";
+import type { Device } from "../../types";
 
-export const Route = createFileRoute("/settings")({
+export const Route = createFileRoute("/app/settings")({
   component: RouteComponent,
 });
 
@@ -25,16 +25,6 @@ function RouteComponent() {
 
   return (
     <div className="h-full w-full bg-black flex flex-col">
-      <div className="text-sm text-white/70 font-medium grid grid-cols-3 px-5 py-2">
-        <p className="flex justify-start items-center">
-          <Link
-            to="/radio"
-            className="flex gap-2 items-center px-3 py-2 bg-neutral-900 rounded-xl"
-          >
-            <MoveLeft className="w-4 h-4 stroke-white/70" /> Back
-          </Link>
-        </p>
-      </div>
       <Tabs.Root
         className="flex gap-2 grow"
         defaultValue="speaker"
