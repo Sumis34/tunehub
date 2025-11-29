@@ -1,1 +1,20 @@
 @import "tailwindcss";
+
+@theme {
+	--animate-play: playAnim;
+	@keyframes playAnim {
+		0% { transform: scaleY(0.2) }
+		10% { transform: scaleY(0.9) }
+		30% { transform: scaleY(0.3) }
+		50% { transform: scaleY(1.0) }
+		70% { transform: scaleY(0.25) }
+		100% { transform: scaleY(0.2) }
+	}
+
+	--animate-idle: idlePulse;
+	@keyframes idlePulse {
+		0% { transform: scaleY(0.35) }
+		50% { transform: scaleY(0.36) }
+		100% { transform: scaleY(0.35) }
+	}
+}

@@ -39,14 +39,14 @@ function RouteComponent() {
 
   return (
     <Link
-      to="/radio"
+      to="/app/radio"
       className="bg-black w-full h-full flex items-center justify-center"
     >
       <div className="text-center">
-        <h1 className="text-8xl text-white">
+        <h1 className="text-9xl text-white">
           {shortTimeFormatter.format(time)}
         </h1>
-        <h2 className="text-2xl text-white/50">
+        <h2 className="text-3xl text-white/50">
           {shortDateFormatter.format(time)}
         </h2>
       </div>

@@ -2,6 +2,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from typing import Any, Dict, List
 import soco
+from starlette.responses import FileResponse 
 
 app = FastAPI()
 
@@ -74,4 +75,4 @@ async def websocket_endpoint(ws: WebSocket):
 
 @app.get("/")
 async def root():
-    return {"message": "TuneHub Server is running"}
+    return FileResponse('index.html')

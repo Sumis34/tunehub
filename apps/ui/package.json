@@ -10,11 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@base-ui-components/react": "1.0.0-beta.4",
     "@tailwindcss/vite": "^4.1.16",
     "@tanstack/react-router": "^1.134.12",
     "@tanstack/react-router-devtools": "^1.134.12",
     "colorthief": "^2.6.0",
     "fast-average-color": "^9.5.0",
+    "lucide-react": "^0.553.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-use-websocket": "^4.13.0",
@@ -34,6 +36,7 @@
     "globals": "^16.4.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.45.0",
-    "vite": "npm:rolldown-vite@7.1.14"
+    "vite": "npm:rolldown-vite@7.1.14",
+    "vite-plugin-singlefile": "^2.3.0"
   }
 }

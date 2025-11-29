@@ -1,13 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import ColorThief from "colorthief";
-import useWeather from "../hooks/use-weather";
-import { useEvent } from "../hooks/use-event";
-import { ReadyState } from "react-use-websocket";
 
-const locale = import.meta.env.VITE_LOCALE || "de-CH";
-
-export const Route = createFileRoute("/radio")({
+export const Route = createFileRoute("/app/radio")({
   component: RouteComponent,
 });
 
@@ -26,21 +21,6 @@ function RouteComponent() {
   const [dominantColorValues, setDominantColorValues] = useState<
     number[] | null
   >(null);
-  const [time, setTime] = useState(new Date());
-
-  const { temperature } = useWeather(47.0274, 7.74526);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const shortTimeFormatter = new Intl.DateTimeFormat(locale, {
-    timeStyle: "short",
-  });
 
   const imgRef = useRef<HTMLImageElement>(null);
 
@@ -53,36 +33,27 @@ function RouteComponent() {
     setDominantColorValues(c);
   }, [imgRef]);
 
-  const [volume, setVolume, readyState] = useEvent("adjust-volume");
+  // const [volume, setVolume, readyState] = useEvent("adjust-volume");
 
-  const connectionStatus = {
-    [ReadyState.CONNECTING]: "Connecting",
-    [ReadyState.OPEN]: "Open",
-    [ReadyState.CLOSING]: "Closing",
-    [ReadyState.CLOSED]: "Closed",
-    [ReadyState.UNINSTANTIATED]: "Uninstantiated",
-  }[readyState];
+  // const connectionStatus = {
+  //   [ReadyState.CONNECTING]: "Connecting",
+  //   [ReadyState.OPEN]: "Open",
+  //   [ReadyState.CLOSING]: "Closing",
+  //   [ReadyState.CLOSED]: "Closed",
+  //   [ReadyState.UNINSTANTIATED]: "Uninstantiated",
+  // }[readyState];
 
   const gradient = `linear-gradient(180deg, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 1) 0%, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 0) 100%)`;
   const shadow = `0px 0px 50px 10px rgba(${dominantColorValues?.slice(0, 3).join(",")},0.5)`;
 
   return (
     <div className="h-full w-full bg-black flex flex-col">
-      <div className="text-sm text-white/70 font-medium py-1 grid grid-cols-3 px-5">
-        <p>{temperature ? `${temperature}°` : ""}</p>
-        <p className="text-center">{shortTimeFormatter.format(time)}</p>
-        <p className="text-right">{connectionStatus} {JSON.stringify(volume)}</p>
-      </div>
       <div className="flex justify-center text-white flex-col grow relative bg-neutral-950 rounded-xl overflow-hidden">
         <div className="z-10 flex justify-between">
           <div className="grid grid-cols-1 grid-rows-3 gap-10 w-24">
             {favorites.slice(0, 3).map((favorite) => (
               <button
-                onClick={() =>
-                  setVolume({
-                    volume: (Math.random() * 100) | 0,
-                  })
-                }
+                onClick={() => {}}
                 key={favorite.id}
                 className="bg-neutral-900 px-5 py-4 rounded-r-lg active:bg-neutral-800 truncate font-medium text-white/80 transition-all border-2 border-neutral-800"
               >
@@ -103,8 +74,8 @@ function RouteComponent() {
               }}
             />
             <div className="mt-4 text-center">
-              <h1 className="text-2xl font-bold">{title}</h1>
-              <h2 className="text-lg text-white/50">{description}</h2>
+              <h1 className="text-4xl font-bold">{title}</h1>
+              <h2 className="text-3xl text-white/50">{description}</h2>
             </div>
           </div>
           <div className="grid grid-cols-1 grid-rows-3 gap-10 w-24">
