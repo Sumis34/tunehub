@@ -1,6 +1,7 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from typing import Any, Dict, List
+import soco
 
 app = FastAPI()
 
@@ -36,6 +37,7 @@ manager = ConnectionManager()
 
 state = {
     "volume": 50,
+    "devices": [],
 }
 
 # WebSocket endpoint
@@ -59,7 +61,11 @@ async def websocket_endpoint(ws: WebSocket):
                     state["volume"] = new_volume
                 else:
                     await manager.send_event(Event(type="error", data={"message": "Invalid volume"}), ws)
-                
+            elif action.type == "discover":
+                devices = soco.discover()
+                state["devices"] = [device.player_name for device in devices]
+                await manager.send_event(Event(type="devices", data={"devices": state["devices"]}), ws)
+
             else:
                 await manager.send_event(Event(type="error", data={"message": "Unknown action"}), ws)
     except WebSocketDisconnect:
