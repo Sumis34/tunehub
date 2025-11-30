@@ -13,7 +13,7 @@ def get_track(zone):
     "title": track["title"],
     "artist": track["artist"],
     "album": track["album"],
-    "album_art": track["album_art"],
+    "albumArt": track["album_art"],
     "duration": track["duration"],
     "position": track["position"],
   }

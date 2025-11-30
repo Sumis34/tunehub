@@ -39,13 +39,21 @@ manager = ConnectionManager()
 state = {
     "volume": 50,
     "devices": [],
+    "active_device": None,
 }
 
 # WebSocket endpoint
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):
     await manager.connect(ws)
-    await manager.send_event(Event(type="adjust-volume", data={"volume": state["volume"]}), ws)
+
+    state["devices"] = [device.player_name for device in soco.discover()]
+    state["active_device"] = state["devices"][0] if state["devices"] else None
+
+    await manager.send_event(Event(type="volume", data=state["volume"]), ws)
+    await manager.send_event(Event(type="devices", data=state["devices"]), ws)
+    await manager.send_event(Event(type="active-device", data=state["active_device"]), ws)
+
     try:
         while True:
             msg = await ws.receive_json()
@@ -62,10 +70,6 @@ async def websocket_endpoint(ws: WebSocket):
                     state["volume"] = new_volume
                 else:
                     await manager.send_event(Event(type="error", data={"message": "Invalid volume"}), ws)
-            elif action.type == "discover":
-                devices = soco.discover()
-                state["devices"] = [device.player_name for device in devices]
-                await manager.send_event(Event(type="devices", data={"devices": state["devices"]}), ws)
 
             else:
                 await manager.send_event(Event(type="error", data={"message": "Unknown action"}), ws)

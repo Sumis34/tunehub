@@ -33,7 +33,7 @@ function RouteComponent() {
     setDominantColorValues(c);
   }, [imgRef]);
 
-  // const [volume, setVolume, readyState] = useEvent("adjust-volume");
+  // const [volume, setVolume, readyState] = useEvent("volume");
 
   // const connectionStatus = {
   //   [ReadyState.CONNECTING]: "Connecting",

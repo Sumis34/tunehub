@@ -1,25 +1,17 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { MoveLeft, Speaker, Wifi } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Speaker, Wifi } from "lucide-react";
 import { Tabs } from "@base-ui-components/react/tabs";
 import AudioBars from "../../components/AudioBars";
 import { useEvent } from "../../hooks/use-event";
-import type { Device } from "../../types";
 
 export const Route = createFileRoute("/app/settings")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const [device, setDevice] = useEvent<Device>("target-device", {
-    id: "default",
-    name: "Küchen Radio",
-  });
+  const [device, setDevice] = useEvent<string>("active-device");
 
-  const [devices] = useEvent<Device[]>("devices", [
-    { id: "default", name: "Küchen Radio" },
-    { id: "livingroom", name: "Wohnzimmer Speaker" },
-    { id: "bedroom", name: "Schlafzimmer Speaker" },
-  ]);
+  const [devices] = useEvent<string[]>("devices", []);
 
   const [isPlaying] = useEvent<boolean>("is-playing", false);
 
@@ -43,10 +35,18 @@ function RouteComponent() {
           <Tabs.Panel className="text-white" value="speaker">
             <h1 className="text-2xl font-bold">Speaker</h1>
             <div className="w-full flex bg-neutral-800 rounded-md mt-5 p-5 gap-3 items-center">
-              <AudioBars playing={isPlaying} />
-              <p className="text-2xl font-semibold text-green-400">
-                {device.name}
-              </p>
+              {device ? (
+                <>
+                  <AudioBars playing={isPlaying} />
+                  <p className="text-2xl font-semibold text-green-400">
+                    {device}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div>No playback device selected</div>
+                </>
+              )}
             </div>
             <div>
               <h2 className="text-lg font-semibold mt-5 mb-2">
@@ -54,17 +54,18 @@ function RouteComponent() {
               </h2>
               <div className="flex flex-col gap-3">
                 {devices
-                  .filter((d) => d.id !== device.id)
+                  .filter((d) => d !== device)
                   .map((d) => (
                     <button
-                      key={d.id}
+                      key={d}
                       onClick={() => setDevice(d)}
                       className={`w-full text-left px-4 py-3 rounded-md font-medium bg-neutral-800 text-white flex gap-1 items-center fade`}
                     >
                       <Speaker className="w-6 h-6 mr-2" />
-                      {d.name}
+                      {d}
                     </button>
                   ))}
+                  {devices.length === 0 && (<div>No devices found</div>)}
               </div>
             </div>
           </Tabs.Panel>
