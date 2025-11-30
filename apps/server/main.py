@@ -13,7 +13,7 @@ class Action(BaseModel):
 
 class Event(BaseModel):
     type: str
-    data: Dict[str, Any] = {}
+    data: Any
 
 # Connection manager for multiple clients
 class ConnectionManager:
