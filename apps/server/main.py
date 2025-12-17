@@ -45,16 +45,14 @@ async def websocket_endpoint(ws: WebSocket):
                 favorite_id = action.data.get("favorite_id")
 
                 if state.active_device and favorite_id:
-                    title, item_class, ref = next((fav for fav in state.favorites if fav[3] == favorite_id), None)
-
-                    print(title)
-
-                    if not title:
+                    favorite = next((fav for fav in state.favorites if fav["id"] == favorite_id), None)
+                    if not favorite:
                         await manager.send_event(Event(type="error", data={"message": "Favorite not found"}), ws)
                         continue
 
-                    play_favorite(state.active_device, title, item_class, ref)  # Auto-syncs to all clients
-                    await manager.send_event(Event(type="playing", data={"favorite_id": favorite_id}), ws)
+                    play_favorite(state.active_device, favorite)
+                    info = state.active_device.get_current_track_info()
+                    await manager.send_event(Event(type="play", data={"favorite_id": favorite_id, "track_info": info}), ws)
                 else:
                     await manager.send_event(Event(type="error", data={"message": "No active device or favorite ID"}), ws)
             elif action.type == "echo":

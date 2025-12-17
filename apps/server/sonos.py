@@ -1,5 +1,5 @@
 from soco import discover, SoCo
-from typing import Tuple
+from typing import TypedDict, Any, Optional, List
 
 SUPPORTED_FAVORITE_TYPES = [
     "audioBroadcast",
@@ -7,11 +7,11 @@ SUPPORTED_FAVORITE_TYPES = [
     "object.item.audioItem.musicTrack",
 ]
 
-class Favorite(Tuple):
-    title: str
-    item_class: str
-    ref: object
-    id: str
+class Favorite(TypedDict):
+  title: str
+  item_class: str
+  ref: Any
+  id: Optional[str]
 
 def extract_uri_from_item(item):
     """
@@ -52,9 +52,9 @@ def is_playlist_container(item_class: str) -> bool:
 def is_radio(item_class: str) -> bool:
   return bool(item_class and ("audioBroadcast" in item_class or "radio" in item_class.lower()))
 
-def get_playable_favorites(zone: SoCo) -> list[Favorite]:
-  favorites: list[Favorite] = []
-  for favorite in zone.music_library.get_sonos_favorites():
+def get_playable_favorites(zone: SoCo) -> List[Favorite]:
+  favorites: List[Favorite] = []
+  for favorite in zone.music_library.get_sonos_favorites(full_album_art_uri=True):
     playable = False
 
     try:
@@ -74,11 +74,22 @@ def get_playable_favorites(zone: SoCo) -> list[Favorite]:
     if not playable:
       continue
 
-    favorites.append((title, item_class, ref, id))
+    favorites.append({
+      "title": title,
+      "item_class": item_class,
+      "ref": ref,
+      "id": id,
+    })
 
   return favorites
 
-def play_favorite(zone: SoCo, title: str, item_class: str, ref):
+def play_favorite(zone: SoCo, favorite: Favorite | list):
+  """Play a favorite. Accepts the new dict Favorite or the legacy tuple (title, item_class, ref, id)."""
+  # Normalize input
+  title = favorite.get("title")
+  item_class = favorite.get("item_class") or ""
+  ref = favorite.get("ref")
+
   try:
       if is_radio(item_class):
         uri, _ = extract_uri_from_item(ref)
@@ -119,8 +130,8 @@ def play_favorite(zone: SoCo, title: str, item_class: str, ref):
   except Exception as e:
     print(f"  Error handling favorite '{title}': {e}")
 
-def get_favorite(favorites, title: str) -> Favorite | None:
-  for fav_title, item_class, ref, id in favorites:
-    if fav_title == title:
-      return (fav_title, item_class, ref, id)
+def get_favorite(favorites: List[Favorite], title: str) -> Optional[Favorite]:
+  for fav in favorites:
+    if fav.get("title") == title:
+      return fav
   return None

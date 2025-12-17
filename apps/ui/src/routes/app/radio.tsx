@@ -15,9 +15,10 @@ function RouteComponent() {
     number[] | null
   >(null);
   const [favorites] = useEvent<Array<[string, string]>>("favorites", []);
-  const [_, play] = useEvent<{
+  const [playing, play] = useEvent<{
     favorite_id: string;
-  }>("play", { favorite_id: "" });
+    track_info?: Record<string, string>;
+  }>("play", { favorite_id: "", track_info: {} });
 
   console.log({ favorites });
 
@@ -55,6 +56,7 @@ function RouteComponent() {
                 onClick={() => {
                   play({
                     favorite_id: id,
+                    track_info: playing.track_info,
                   });
                 }}
                 key={id}
@@ -67,7 +69,7 @@ function RouteComponent() {
           <div>
             <img
               ref={imgRef}
-              src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b7/NirvanaNevermindalbumcover.jpg/250px-NirvanaNevermindalbumcover.jpg"
+              src={playing.track_info?.album_art || ""}
               // src="https://i.ebayimg.com/images/g/pVkAAOSwKmZhoXM7/s-l1200.jpg"
               alt="cover art"
               className="rounded-md w-60 aspect-square"
@@ -77,7 +79,7 @@ function RouteComponent() {
               }}
             />
             <div className="mt-4 text-center">
-              <h1 className="text-4xl font-bold">{title}</h1>
+              <h1 className="text-4xl font-bold">{playing.track_info?.title}</h1>
               <h2 className="text-3xl text-white/50">{description}</h2>
             </div>
           </div>
@@ -85,6 +87,12 @@ function RouteComponent() {
             {favorites.slice(3, 6).map(([name, id]) => (
               <button
                 key={id}
+                onClick={() => {
+                  play({
+                    favorite_id: id,
+                    track_info: playing.track_info,
+                  });
+                }}
                 className="bg-neutral-900 px-5 py-4 rounded-l-lg active:bg-neutral-800 truncate font-medium text-white/80 transition-all border-2 border-neutral-800"
               >
                 {name}
