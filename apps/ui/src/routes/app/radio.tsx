@@ -9,9 +9,6 @@ export const Route = createFileRoute("/app/radio")({
   component: RouteComponent,
 });
 
-const title = "Radio TuneHub";
-const description = "80s Hits";
-
 function RouteComponent() {
   const [dominantColorValues, setDominantColorValues] = useState<
     number[] | null
@@ -25,6 +22,7 @@ function RouteComponent() {
   console.log({ favorites });
 
   const imgRef = useRef<HTMLImageElement>(null);
+  const coverArt = `${API_BASE}/proxy?url=${encodeURIComponent(playing.track_info?.album_art || "")}`;
 
   useEffect(() => {
     const colorThief = new ColorThief();
@@ -33,7 +31,7 @@ function RouteComponent() {
     }
     const c = colorThief.getColor(imgRef.current);
     setDominantColorValues(c);
-  }, [imgRef]);
+  }, [imgRef, coverArt]);
 
   // const [volume, setVolume, readyState] = useEvent("volume");
 
@@ -44,8 +42,6 @@ function RouteComponent() {
   //   [ReadyState.CLOSED]: "Closed",
   //   [ReadyState.UNINSTANTIATED]: "Uninstantiated",
   // }[readyState];
-
-  const coverArt = `${API_BASE}/proxy?url=${encodeURIComponent(playing.track_info?.album_art || "")}`
 
   const gradient = `linear-gradient(180deg, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 1) 0%, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 0) 100%)`;
   const shadow = `0px 0px 50px 10px rgba(${dominantColorValues?.slice(0, 3).join(",")},0.5)`;
@@ -70,11 +66,10 @@ function RouteComponent() {
               </button>
             ))}
           </div>
-          <div>
+          <div className="flex flex-col items-center">
             <img
               ref={imgRef}
               src={coverArt}
-              // src="https://i.ebayimg.com/images/g/pVkAAOSwKmZhoXM7/s-l1200.jpg"
               alt="cover art"
               className="rounded-md w-60 aspect-square"
               crossOrigin="anonymous"
@@ -83,8 +78,12 @@ function RouteComponent() {
               }}
             />
             <div className="mt-4 text-center">
-              <h1 className="text-4xl font-bold">{playing.track_info?.title}</h1>
-              <h2 className="text-3xl text-white/50">{description}</h2>
+              <h1 className="text-4xl font-semibold">
+                {playing.track_info?.title}
+              </h1>
+              <h2 className="text-3xl text-white/50">
+                {playing.track_info?.artist}
+              </h2>
             </div>
           </div>
           <div className="grid grid-cols-1 grid-rows-3 gap-10 w-24">

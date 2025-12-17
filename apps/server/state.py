@@ -95,8 +95,11 @@ class StateManager:
     async def sync_active_device(self):
         """Sync active device state to all clients"""
         if self._connection_manager:
+            data = {
+                "device_name": self._active_device.player_name if self._active_device else None
+            }
             await self._connection_manager.broadcast(
-                Event(type=self.event_names.ACTIVE_DEVICE.value, data=(self._active_device.player_name if self._active_device else None))
+                Event(type=self.event_names.ACTIVE_DEVICE.value, data=data)
             )
 
     async def sync_favorites(self):
