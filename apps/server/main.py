@@ -85,10 +85,11 @@ async def websocket_endpoint(ws: WebSocket):
 async def proxy_image(url: str = Query(..., description="URL to proxy")):
     """Proxy endpoint for cover art and images from Sonos devices"""
     # Basic URL validation
-    if not url.startswith(("http://", "https://")):
-        raise HTTPException(status_code=400, detail="Invalid URL scheme")
     
     try:
+        if not url.startswith(("http://", "https://")):
+            raise Exception("Invalid URL scheme")
+        
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(url)
             response.raise_for_status()
@@ -104,8 +105,20 @@ async def proxy_image(url: str = Query(..., description="URL to proxy")):
                     "Access-Control-Allow-Origin": "*"
                 }
             )
-    except httpx.HTTPError as e:
-        raise HTTPException(status_code=502, detail=f"Failed to fetch image: {str(e)}")
+    except Exception as e:
+        file_path = "./assets/empty.png"
+
+        with open(file_path, "rb") as f:
+            content = f.read()
+            content_type = "image/png"  
+            return Response(
+                    content=content,
+                    media_type=content_type,
+                    headers={
+                        "Cache-Control": "public, max-age=3600",
+                        "Access-Control-Allow-Origin": "*"
+                    }
+                )
 
 @app.get("/")
 async def root():
