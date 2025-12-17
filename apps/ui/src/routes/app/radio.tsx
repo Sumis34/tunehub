@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import ColorThief from "colorthief";
 import { useEvent } from "../../hooks/use-event";
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "localhost:8000";
+
 export const Route = createFileRoute("/app/radio")({
   component: RouteComponent,
 });
@@ -43,6 +45,8 @@ function RouteComponent() {
   //   [ReadyState.UNINSTANTIATED]: "Uninstantiated",
   // }[readyState];
 
+  const coverArt = `${API_BASE}/proxy?url=${encodeURIComponent(playing.track_info?.album_art || "")}`
+
   const gradient = `linear-gradient(180deg, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 1) 0%, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 0) 100%)`;
   const shadow = `0px 0px 50px 10px rgba(${dominantColorValues?.slice(0, 3).join(",")},0.5)`;
 
@@ -69,7 +73,7 @@ function RouteComponent() {
           <div>
             <img
               ref={imgRef}
-              src={playing.track_info?.album_art || ""}
+              src={coverArt}
               // src="https://i.ebayimg.com/images/g/pVkAAOSwKmZhoXM7/s-l1200.jpg"
               alt="cover art"
               className="rounded-md w-60 aspect-square"

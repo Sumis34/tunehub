@@ -1,12 +1,23 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from typing import Any, Dict, List, Optional, Callable
 import soco
-from starlette.responses import FileResponse 
+import httpx
+from starlette.responses import FileResponse, Response 
 from sonos import get_playable_favorites, play_favorite
 from state import StateManager
 from connection import ConnectionManager, Action, Event
 
 app = FastAPI()
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 manager = ConnectionManager()
 state = StateManager(manager)
@@ -69,6 +80,32 @@ async def websocket_endpoint(ws: WebSocket):
     except WebSocketDisconnect:
         manager.disconnect(ws)
         print("Client disconnected")
+
+@app.get("/proxy")
+async def proxy_image(url: str = Query(..., description="URL to proxy")):
+    """Proxy endpoint for cover art and images from Sonos devices"""
+    # Basic URL validation
+    if not url.startswith(("http://", "https://")):
+        raise HTTPException(status_code=400, detail="Invalid URL scheme")
+    
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(url)
+            response.raise_for_status()
+            
+            # Get content type from the response
+            content_type = response.headers.get("content-type", "application/octet-stream")
+            
+            return Response(
+                content=response.content,
+                media_type=content_type,
+                headers={
+                    "Cache-Control": "public, max-age=3600",
+                    "Access-Control-Allow-Origin": "*"
+                }
+            )
+    except httpx.HTTPError as e:
+        raise HTTPException(status_code=502, detail=f"Failed to fetch image: {str(e)}")
 
 @app.get("/")
 async def root():
