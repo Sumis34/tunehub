@@ -1,3 +1,5 @@
+![alt text](./docs/image.png)
+
 # tunehub
 
 A touchscreen-first UI for controlling audio playback across multiple devices. I built this to run on a Raspberry Pi with a touchscreen, but it should work on any device with a web browser.
