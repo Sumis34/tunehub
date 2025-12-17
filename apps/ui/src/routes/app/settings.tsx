@@ -9,7 +9,10 @@ export const Route = createFileRoute("/app/settings")({
 });
 
 function RouteComponent() {
-  const [device, setDevice] = useEvent<string>("active-device");
+  const [device, setDevice] = useEvent<{ device_name: string | null }>(
+    "active-device",
+    { device_name: null }
+  );
 
   const [devices] = useEvent<string[]>("devices", []);
 
@@ -39,7 +42,7 @@ function RouteComponent() {
                 <>
                   <AudioBars playing={isPlaying} />
                   <p className="text-2xl font-semibold text-green-400">
-                    {device}
+                    {device.device_name}
                   </p>
                 </>
               ) : (
@@ -54,18 +57,18 @@ function RouteComponent() {
               </h2>
               <div className="flex flex-col gap-3">
                 {devices
-                  .filter((d) => d !== device)
+                  .filter((d) => d !== device.device_name)
                   .map((d) => (
                     <button
                       key={d}
-                      onClick={() => setDevice(d)}
+                      onClick={() => setDevice({ device_name: d })}
                       className={`w-full text-left px-4 py-3 rounded-md font-medium bg-neutral-800 text-white flex gap-1 items-center fade`}
                     >
                       <Speaker className="w-6 h-6 mr-2" />
                       {d}
                     </button>
                   ))}
-                  {devices.length === 0 && (<div>No devices found</div>)}
+                {devices.length === 0 && <div>No devices found</div>}
               </div>
             </div>
           </Tabs.Panel>

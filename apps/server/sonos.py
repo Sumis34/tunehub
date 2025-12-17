@@ -1,4 +1,17 @@
-from soco import discover
+from soco import discover, SoCo
+from typing import Tuple
+
+SUPPORTED_FAVORITE_TYPES = [
+    "audioBroadcast",
+    "object.container.playlistContainer",
+    "object.item.audioItem.musicTrack",
+]
+
+class Favorite(Tuple):
+    title: str
+    item_class: str
+    ref: object
+    id: str
 
 def extract_uri_from_item(item):
     """
@@ -29,29 +42,85 @@ def extract_uri_from_item(item):
     # fallback attributes
     uri = getattr(item, "uri", None) or getattr(item, "url", None)
     return uri, title
+ 
+def is_container(item_class: str) -> bool:
+  return bool(item_class and "object.container" in item_class)
 
-for zone in discover():
-  # zone.pause()
-  track = zone.get_current_track_info()
-  # print(track)
-  # zone.play_uri('http://ia801402.us.archive.org/20/items/TenD2005-07-16.flac16/TenD2005-07-16t10Wonderboy.mp3')
-  
-  # for favorite in zone.music_library.get_sonos_favorites():
-  #   uri = None
-  #   for resource in favorite.resources:
-  #     uri = resource.uri
-  #     break
-  #   print(f"Favorite: {favorite.title} - {uri}")
+def is_playlist_container(item_class: str) -> bool:
+  return bool(item_class and "object.container.playlistContainer" in item_class)
 
-  favorite = zone.music_library.get_sonos_favorites()[4]
-  uri = extract_uri_from_item(favorite)[0]
-  
-  # for resource in favorite.resources:
-    # uri = resource.uri
+def is_radio(item_class: str) -> bool:
+  return bool(item_class and ("audioBroadcast" in item_class or "radio" in item_class.lower()))
 
-  zone.add_uri_to_queue(uri=uri, title=favorite.title)
-  zone.play_from_queue(index=0)
+def get_playable_favorites(zone: SoCo) -> list[Favorite]:
+  favorites: list[Favorite] = []
+  for favorite in zone.music_library.get_sonos_favorites():
+    playable = False
 
-  # zone.play_uri(uri=uri, title=favorite.title)
+    try:
+      ref = getattr(favorite, "reference", None) or favorite
+    except Exception:
+      ref = favorite
 
-  print(f"Playing favorite: {favorite.title}")
+    title = getattr(ref, "title", None) or getattr(favorite, "title", None)
+    item_class = getattr(ref, "item_class", "") or getattr(favorite, "item_class", "")
+    id = getattr(ref, "item_id", None)
+    
+    for fav_type in SUPPORTED_FAVORITE_TYPES:
+      if bool(item_class and fav_type in item_class):
+        playable = True
+        break
+
+    if not playable:
+      continue
+
+    favorites.append((title, item_class, ref, id))
+
+  return favorites
+
+def play_favorite(zone: SoCo, title: str, item_class: str, ref):
+  try:
+      if is_radio(item_class):
+        uri, _ = extract_uri_from_item(ref)
+        if uri:
+          print("  Radio/broadcast detected. Playing via play_uri...")
+          zone.play_uri(uri=uri, title=title)
+        else:
+          print("  No stream URI found for radio item; skipping.")
+      elif is_playlist_container(item_class):
+        print("  Playlist container detected. Attempting to enqueue playlist...")
+        try:
+          zone.clear_queue()
+          zone.add_to_queue(ref)
+          zone.play_from_queue(index=0)
+        except Exception as e:
+          print(f"Could not enqueue playlist container: {e}")
+          return
+
+      elif is_container(item_class):
+        print("NOT SUPPORTED: Container detected, skipping...")
+        # TODO: Handle this case to enqueue child items individually. Unknown how it should behave. This concearns "Trending Now", "Sonos Presents", "Discover Sonos Radio"
+        return
+
+      else:
+        print("  Single item detected. Enqueuing...")
+        try:
+          zone.clear_queue()
+          zone.add_to_queue(ref)
+        except Exception:
+          uri, _ = extract_uri_from_item(ref)
+          if uri:
+            zone.clear_queue()
+            zone.add_uri_to_queue(uri=uri, title=title)
+          else:
+            print("  Could not enqueue item (no DIDL add and no URI).")
+            return
+        zone.play_from_queue(index=0)
+  except Exception as e:
+    print(f"  Error handling favorite '{title}': {e}")
+
+def get_favorite(favorites, title: str) -> Favorite | None:
+  for fav_title, item_class, ref, id in favorites:
+    if fav_title == title:
+      return (fav_title, item_class, ref, id)
+  return None

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import ColorThief from "colorthief";
+import { useEvent } from "../../hooks/use-event";
 
 export const Route = createFileRoute("/app/radio")({
   component: RouteComponent,
@@ -9,18 +10,16 @@ export const Route = createFileRoute("/app/radio")({
 const title = "Radio TuneHub";
 const description = "80s Hits";
 
-const favorites = [
-  { name: "SRF 3", id: "srf3" },
-  { name: "Radio Swiss Pop", id: "radioswisspop" },
-  { name: "Radio Swiss Jazz", id: "radioswissjazz" },
-  { name: "Radio Swiss Classic", id: "radioswissclassic" },
-  { name: "Energy Zürich", id: "energyzuerich" },
-];
-
 function RouteComponent() {
   const [dominantColorValues, setDominantColorValues] = useState<
     number[] | null
   >(null);
+  const [favorites] = useEvent<Array<[string, string]>>("favorites", []);
+  const [_, play] = useEvent<{
+    favorite_id: string;
+  }>("play", { favorite_id: "" });
+
+  console.log({ favorites });
 
   const imgRef = useRef<HTMLImageElement>(null);
 
@@ -51,13 +50,17 @@ function RouteComponent() {
       <div className="flex justify-center text-white flex-col grow relative bg-neutral-950 rounded-xl overflow-hidden">
         <div className="z-10 flex justify-between">
           <div className="grid grid-cols-1 grid-rows-3 gap-10 w-24">
-            {favorites.slice(0, 3).map((favorite) => (
+            {favorites.slice(0, 3).map(([name, id]) => (
               <button
-                onClick={() => {}}
-                key={favorite.id}
+                onClick={() => {
+                  play({
+                    favorite_id: id,
+                  });
+                }}
+                key={id}
                 className="bg-neutral-900 px-5 py-4 rounded-r-lg active:bg-neutral-800 truncate font-medium text-white/80 transition-all border-2 border-neutral-800"
               >
-                {favorite.name}
+                {name}
               </button>
             ))}
           </div>
@@ -79,12 +82,12 @@ function RouteComponent() {
             </div>
           </div>
           <div className="grid grid-cols-1 grid-rows-3 gap-10 w-24">
-            {favorites.slice(3, 6).map((favorite) => (
+            {favorites.slice(3, 6).map(([name, id]) => (
               <button
-                key={favorite.id}
+                key={id}
                 className="bg-neutral-900 px-5 py-4 rounded-l-lg active:bg-neutral-800 truncate font-medium text-white/80 transition-all border-2 border-neutral-800"
               >
-                {favorite.name}
+                {name}
               </button>
             ))}
           </div>
