@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import ColorThief from "colorthief";
 import { useEvent } from "../../hooks/use-event";
 
@@ -24,14 +24,25 @@ function RouteComponent() {
   const imgRef = useRef<HTMLImageElement>(null);
   const coverArt = `${API_BASE}/proxy?url=${encodeURIComponent(playing.track_info?.album_art || "")}`;
 
-  useEffect(() => {
-    const colorThief = new ColorThief();
-    if (!imgRef.current?.complete) {
-      return;
+  const extractColor = () => {
+    if (!imgRef.current) return;
+    
+    try {
+      const colorThief = new ColorThief();
+      
+      // Ensure image is fully loaded and has dimensions
+      if (imgRef.current.complete && imgRef.current.naturalWidth > 0) {
+        const color = colorThief.getColor(imgRef.current);
+        if (color && color.length === 3) {
+          setDominantColorValues(color);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to extract color:", error);
+      // Set fallback color (neutral gray)
+      setDominantColorValues([64, 64, 64]);
     }
-    const c = colorThief.getColor(imgRef.current);
-    setDominantColorValues(c);
-  }, [imgRef, coverArt]);
+  };
 
   // const [volume, setVolume, readyState] = useEvent("volume");
 
@@ -73,6 +84,8 @@ function RouteComponent() {
               alt="cover art"
               className="rounded-md w-60 aspect-square"
               crossOrigin="anonymous"
+              onLoad={extractColor}
+              onError={() => setDominantColorValues([64, 64, 64])}
               style={{
                 boxShadow: shadow,
               }}
