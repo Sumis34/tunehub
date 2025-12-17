@@ -92,10 +92,10 @@ function RouteComponent() {
             />
             <div className="mt-4 text-center">
               <h1 className="text-4xl font-semibold">
-                {playing.track_info?.title}
+                {playing.track_info?.title ?? "Unknown Track"}
               </h1>
               <h2 className="text-3xl text-white/50">
-                {playing.track_info?.artist}
+                {playing.track_info?.artist ?? "-"}
               </h2>
             </div>
           </div>
