@@ -60,10 +60,10 @@ function RouteComponent() {
   const artist = playing.track_info?.artist ?? "Unknown Artist";
 
   return (
-    <div className="h-full w-full p-1 flex flex-col bg-neutral-900">
-      <div className="grid grid-rows-1 grid-cols-4 flex-1 grow">
+    <div className="h-full w-full p-1 flex flex-col">
+      <div className="grid grid-rows-1 grid-cols-4 flex-1 grow gap-1">
         <div
-          className="col-span-3 flex items-center justify-center rounded-lg"
+          className="col-span-3 flex items-center justify-center rounded-lg transition-colors"
           style={{
             background: dominantColorValues ? bgColor : "transparent",
           }}
@@ -71,9 +71,10 @@ function RouteComponent() {
           <img
             ref={imgRef}
             // src={coverArt}
-            src="https://cms-assets.tutsplus.com/cdn-cgi/image/width=360/uploads/users/114/posts/34296/final_image/Final-image.jpg"
+            src="https://marketplace.canva.com/EAGl2RBdUF0/1/0/1600w/canva-dark-green-and-white-modern-lost-in-stars-album-cover-LkSUXx1d-Sw.jpg"
+            // src="https://cms-assets.tutsplus.com/cdn-cgi/image/width=360/uploads/users/114/posts/34296/final_image/Final-image.jpg"
             alt="cover art"
-            className="rounded-md aspect-square"
+            className="rounded-md h-72 aspect-square"
             crossOrigin="anonymous"
             onLoad={extractColor}
             onError={() => setDominantColorValues([64, 64, 64])}
@@ -82,7 +83,7 @@ function RouteComponent() {
             }}
           />
         </div>
-        <div className="col-span-1">
+        <div className="col-span-1 bg-neutral-900 rounded-lg">
           {favorites.map(([name, id]) => (
             <button
               onClick={() => {
@@ -99,7 +100,7 @@ function RouteComponent() {
           ))}
         </div>
       </div>
-      <div className="grid grid-rows-1 grid-cols-4">
+      <div className="grid grid-rows-1 grid-cols-4 gap-1">
         <div className="col-span-3 p-2">
           <h1 className="text-3xl text-white">{title}</h1>
           <h2 className="text-2xl text-white/50">{artist}</h2>

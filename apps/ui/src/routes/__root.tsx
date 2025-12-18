@@ -1,6 +1,5 @@
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import Header from "../components/header";
 
 const isDebugMode = import.meta.env.VITE_DEBUG_MODE === "true";
 
@@ -20,9 +19,9 @@ const RootLayout = () => (
         </Link>
       </div>
     )}
-    <div className="flex items-center justify-center grow bg-neutral-950">
+    <div className="flex items-center justify-center grow bg-gray-300">
       <div
-        className={`${isDebugMode ? "border-neutral-900" : ""}`}
+        className={"bg-neutral-950"}
         style={{
           width: isDebugMode ? import.meta.env.VITE_SCREEN_WIDTH : "100%",
           height: isDebugMode ? import.meta.env.VITE_SCREEN_HEIGHT : "100%",
