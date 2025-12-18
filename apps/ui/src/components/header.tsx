@@ -22,6 +22,7 @@ export default function Header() {
   const shortTimeFormatter = new Intl.DateTimeFormat(locale, {
     timeStyle: "short",
   });
+  
   return (
     <div className="text-xl text-white/70 py-2 grid grid-cols-3 px-5">
       <p>{temperature ? `${temperature}°` : ""}</p>
