@@ -26,11 +26,10 @@ function RouteComponent() {
 
   const extractColor = () => {
     if (!imgRef.current) return;
-    
+
     try {
       const colorThief = new ColorThief();
-      
-      // Ensure image is fully loaded and has dimensions
+
       if (imgRef.current.complete && imgRef.current.naturalWidth > 0) {
         const color = colorThief.getColor(imgRef.current);
         if (color && color.length === 3) {
@@ -39,7 +38,6 @@ function RouteComponent() {
       }
     } catch (error) {
       console.error("Failed to extract color:", error);
-      // Set fallback color (neutral gray)
       setDominantColorValues([64, 64, 64]);
     }
   };
@@ -54,79 +52,59 @@ function RouteComponent() {
   //   [ReadyState.UNINSTANTIATED]: "Uninstantiated",
   // }[readyState];
 
-  const gradient = `linear-gradient(180deg, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 1) 0%, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 0) 100%)`;
+  // const gradient = `linear-gradient(180deg, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 1) 0%, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 0) 100%)`;
   const shadow = `0px 0px 50px 10px rgba(${dominantColorValues?.slice(0, 3).join(",")},0.5)`;
+  const bgColor = `rgba(${dominantColorValues?.join(",")})`;
+
+  const title = playing.track_info?.title ?? "Unknown Track";
+  const artist = playing.track_info?.artist ?? "Unknown Artist";
 
   return (
-    <div className="h-full w-full bg-black flex flex-col">
-      <div className="flex justify-center text-white flex-col grow relative bg-neutral-950 rounded-xl overflow-hidden">
-        <div className="z-10 flex justify-between">
-          <div className="grid grid-cols-1 grid-rows-3 gap-10 w-24">
-            {favorites.slice(0, 3).map(([name, id]) => (
-              <button
-                onClick={() => {
-                  play({
-                    favorite_id: id,
-                    track_info: playing.track_info,
-                  });
-                }}
-                key={id}
-                className="bg-neutral-900 px-5 py-4 rounded-r-lg active:bg-neutral-800 truncate font-medium text-white/80 transition-all border-2 border-neutral-800"
-              >
-                {name}
-              </button>
-            ))}
-          </div>
-          <div className="flex flex-col items-center">
-            <img
-              ref={imgRef}
-              src={coverArt}
-              alt="cover art"
-              className="rounded-md w-60 aspect-square"
-              crossOrigin="anonymous"
-              onLoad={extractColor}
-              onError={() => setDominantColorValues([64, 64, 64])}
-              style={{
-                boxShadow: shadow,
-              }}
-            />
-            <div className="mt-4 text-center">
-              <h1 className="text-4xl font-semibold">
-                {playing.track_info?.title ?? "Unknown Track"}
-              </h1>
-              <h2 className="text-3xl text-white/50">
-                {playing.track_info?.artist === "" ? "-" : playing.track_info?.artist ?? "-"}
-              </h2>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 grid-rows-3 gap-10 w-24">
-            {favorites.slice(3, 6).map(([name, id]) => (
-              <button
-                key={id}
-                onClick={() => {
-                  play({
-                    favorite_id: id,
-                    track_info: playing.track_info,
-                  });
-                }}
-                className="bg-neutral-900 px-5 py-4 rounded-l-lg active:bg-neutral-800 truncate font-medium text-white/80 transition-all border-2 border-neutral-800"
-              >
-                {name}
-              </button>
-            ))}
-          </div>
-        </div>
+    <div className="h-full w-full p-1 flex flex-col bg-neutral-900">
+      <div className="grid grid-rows-1 grid-cols-4 flex-1 grow">
         <div
-          className="absolute inset-0 z-0"
+          className="col-span-3 flex items-center justify-center rounded-lg"
           style={{
-            background: dominantColorValues ? gradient : "transparent",
+            background: dominantColorValues ? bgColor : "transparent",
           }}
-        ></div>
-        <img
-          src="/noiseTexture.png"
-          className="absolute inset-0 mix-blend-multiply w-full h-full object-cover"
-          alt="noise texture"
-        />
+        >
+          <img
+            ref={imgRef}
+            // src={coverArt}
+            src="https://cms-assets.tutsplus.com/cdn-cgi/image/width=360/uploads/users/114/posts/34296/final_image/Final-image.jpg"
+            alt="cover art"
+            className="rounded-md aspect-square"
+            crossOrigin="anonymous"
+            onLoad={extractColor}
+            onError={() => setDominantColorValues([64, 64, 64])}
+            style={{
+              boxShadow: shadow,
+            }}
+          />
+        </div>
+        <div className="col-span-1">
+          {favorites.map(([name, id]) => (
+            <button
+              onClick={() => {
+                play({
+                  favorite_id: id,
+                  track_info: playing.track_info,
+                });
+              }}
+              key={id}
+              className="bg-neutral-900 px-5 py-4 rounded-r-lg active:bg-neutral-800 truncate font-medium text-white/80 transition-all border-2 border-neutral-800"
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="grid grid-rows-1 grid-cols-4">
+        <div className="col-span-3 p-2">
+          <h1 className="text-3xl text-white">{title}</h1>
+          <h2 className="text-2xl text-white/50">{artist}</h2>
+        </div>
+        <div className="col-span-1"></div>
       </div>
     </div>
   );
