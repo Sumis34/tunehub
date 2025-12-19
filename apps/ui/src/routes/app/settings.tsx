@@ -27,12 +27,12 @@ function RouteComponent() {
       >
         <Tabs.List className="relative z-0 flex flex-col gap-2">
           <Tabs.Tab className="p-3 group" value="speaker">
-            <Speaker className="stroke-white/70 w-12 h-12 group-data-selected:stroke-green-400 transition-all duration-200 ease-in-out" />
+            <Speaker className="stroke-white/70 w-12 h-12 group-data-selected:stroke-blue-400 transition-all duration-200 ease-in-out" />
           </Tabs.Tab>
           <Tabs.Tab className="p-3 group" value="connections">
-            <Wifi className="stroke-white/70 w-12 h-12 group-data-selected:stroke-green-400 transition-all duration-200 ease-in-out" />
+            <Wifi className="stroke-white/70 w-12 h-12 group-data-selected:stroke-blue-400 transition-all duration-200 ease-in-out" />
           </Tabs.Tab>
-          <Tabs.Indicator className="absolute left-0 z-[-1] h-(--active-tab-height) w-1 translate-y-(--active-tab-top) rounded-r-sm bg-green-400 transition-all duration-200 ease-in-out" />
+          <Tabs.Indicator className="absolute left-0 z-[-1] h-(--active-tab-height) w-1 translate-y-(--active-tab-top) rounded-r-sm bg-blue-400 transition-all duration-200 ease-in-out" />
         </Tabs.List>
         <div className="bg-neutral-900 grow p-5 overflow-y-auto">
           <Tabs.Panel className="text-white" value="speaker">
@@ -41,7 +41,7 @@ function RouteComponent() {
               {device ? (
                 <>
                   <AudioBars playing={isPlaying} />
-                  <p className="text-2xl font-semibold text-green-400">
+                  <p className="text-2xl font-semibold text-blue-400">
                     {device.device_name}
                   </p>
                 </>

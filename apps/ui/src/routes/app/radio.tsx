@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import ColorThief from "colorthief";
 import { useEvent } from "../../hooks/use-event";
+import { LucidePauseCircle, LucidePlayCircle } from "lucide-react";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "localhost:8000";
 
@@ -22,7 +23,9 @@ function RouteComponent() {
     track_info?: Record<string, string>;
   }>("play", { favorite_id: "", track_info: {} });
 
-  console.log({ favorites });
+  const [playbackState, setPlaybackState] = useEvent<{ paused: boolean }>(
+    "pause", { paused: true }
+  );
 
   const imgRef = useRef<HTMLImageElement>(null);
   const coverArt = `${API_BASE}/proxy?url=${encodeURIComponent(playing.track_info?.album_art || "")}`;
@@ -64,9 +67,9 @@ function RouteComponent() {
 
   return (
     <div className="flex-1 min-h-0 p-1 flex flex-col">
-      <div className="grid grid-rows-1 grid-cols-4 flex-1 grow gap-1 min-h-0">
+      <div className="grid grid-rows-1 grid-cols-3 flex-1 grow gap-1 min-h-0">
         <div
-          className="col-span-3 flex items-center justify-center rounded-lg transition-colors"
+          className="col-span-2 flex items-center justify-center rounded-lg transition-colors"
           style={{
             background: dominantColorValues ? bgColor : "transparent",
           }}
@@ -74,7 +77,7 @@ function RouteComponent() {
           <img
             ref={imgRef}
             src={coverArt}
-            // src="https://marketplace.canva.com/EAGl2RBdUF0/1/0/1600w/canva-dark-green-and-white-modern-lost-in-stars-album-cover-LkSUXx1d-Sw.jpg"
+            // src="https://marketplace.canva.com/EAGl2RBdUF0/1/0/1600w/canva-dark-blue-and-white-modern-lost-in-stars-album-cover-LkSUXx1d-Sw.jpg"
             // src="https://cms-assets.tutsplus.com/cdn-cgi/image/width=360/uploads/users/114/posts/34296/final_image/Final-image.jpg"
             alt="cover art"
             className="rounded-md h-72 aspect-square"
@@ -86,8 +89,8 @@ function RouteComponent() {
             }}
           />
         </div>
-        <div className="col-span-1 bg-neutral-900 rounded-lg divide-neutral-800 divide-y overflow-y-auto mask-exclude masked-overflow">
-          <div>
+        <div className="col-span-1 bg-neutral-900 rounded-lg overflow-y-auto mask-exclude masked-overflow no-scrollbar">
+          <div className="divide-neutral-800 divide-y">
             {favorites.map(([name, id, desc]) => (
               <button
                 onClick={() => {
@@ -99,19 +102,30 @@ function RouteComponent() {
                 key={id}
                 className="px-2 py-4 active:bg-neutral-800 text-neutral-100 truncate transition-all w-full text-left"
               >
-                <div className="truncate">{name}</div>
-                <span className="text-sm text-neutral-500">{desc}</span>
+                <div className="truncate text-xl">{name}</div>
+                <span className="text-lg text-neutral-500">{desc}</span>
               </button>
             ))}
           </div>
         </div>
       </div>
-      <div className="grid grid-rows-1 grid-cols-4 gap-1">
-        <div className="col-span-3 p-2">
+      <div className="grid grid-rows-1 grid-cols-3 gap-1 h-21">
+        <div className="col-span-2 p-2">
           <h1 className="text-3xl text-neutral-100 truncate">{title}</h1>
           <h2 className="text-2xl text-neutral-500">{artist}</h2>
         </div>
-        <div className="col-span-1"></div>
+        <div className="col-span-1 flex items-center justify-start">
+          <button
+            onClick={() => setPlaybackState({ paused: !playbackState.paused })}
+            className=""
+          >
+            {playbackState && playbackState.paused ? (
+              <LucidePauseCircle className="stroke-neutral-100 size-14" />
+            ) : (
+              <LucidePlayCircle className="stroke-neutral-100 size-14" />
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

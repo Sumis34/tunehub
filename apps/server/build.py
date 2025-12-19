@@ -9,6 +9,10 @@ INCLUDE_FILES = [
     "main.py",
     "app.py",
     "requirements.txt",
+    "connection.py",
+    "handlers.py",
+    "sonos.py",
+    "state.py",
 ]
 
 # Directories you actually have — adjust this for YOUR repo

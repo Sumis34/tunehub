@@ -28,7 +28,7 @@ export default function AudioBars({ playing = false, className = "" }: Props) {
           <div
             key={i}
             style={style}
-            className={`w-1 h-full origin-bottom bg-green-400 rounded-sm`}
+            className={`w-1 h-full origin-bottom bg-blue-400 rounded-sm`}
           />
         );
       })}

@@ -59,6 +59,19 @@ async def handle_volume(manager: ConnectionManager, ws, state: StateManager, dat
             Event(type="error", data={"message": "Invalid volume"}), ws
         )
 
+async def handle_pause(manager: ConnectionManager, ws, state: StateManager, data: dict):
+    """Handle pause action"""
+    if state.active_device:
+        info = state.active_device.get_current_transport_info()
+        if info["current_transport_state"] == "PLAYING":
+            return  state.active_device.pause()
+        else:
+            state.active_device.play()
+
+    else:
+        await manager.send_event(
+            Event(type="error", data={"message": "No active device"}), ws
+        )
 
 async def dispatch_action(
     action_type: str,
@@ -75,6 +88,8 @@ async def dispatch_action(
             await handle_play(manager, ws, state, data)
         case "volume":
             await handle_volume(manager, ws, state, data)
+        case "pause":
+            await handle_pause(manager, ws, state, data)
         case _:
             await manager.send_event(
                 Event(type="error", data={"message": "Unknown action"}), ws

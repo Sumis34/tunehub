@@ -54,3 +54,15 @@ cd tunehub
 ```bash
 systemctl status tunehubd
 ```
+
+1 Launch chromium in kiosk mode to start using TuneHub:
+
+```bash
+DISPLAY=:0 nohup chromium http://192.168.1.109:5173 --kiosk --start-fullscreen -disable-pinch --incognito
+```
+
+## Usage
+
+### Debugging
+
+- Tripple click the time in the header to reload the window.

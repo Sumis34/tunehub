@@ -192,7 +192,7 @@ async def websocket_endpoint(ws: WebSocket):
     
     except WebSocketDisconnect:
         manager.disconnect(ws)
-        await _unsubscribe_from_all_devices()
+        # await _unsubscribe_from_all_devices()
         logger.info(f"Client disconnected. Active connections: {len(manager.active_connections)}")
     except Exception as e:
         logger.error(f"WebSocket error: {e}")
