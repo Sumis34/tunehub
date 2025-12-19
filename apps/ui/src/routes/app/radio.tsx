@@ -13,7 +13,10 @@ function RouteComponent() {
   const [dominantColorValues, setDominantColorValues] = useState<
     number[] | null
   >(null);
-  const [favorites] = useEvent<Array<[string, string]>>("favorites", []);
+  const [favorites] = useEvent<Array<[string, string, string, string]>>(
+    "favorites",
+    []
+  );
   const [playing, play] = useEvent<{
     favorite_id: string;
     track_info?: Record<string, string>;
@@ -60,8 +63,8 @@ function RouteComponent() {
   const artist = playing.track_info?.artist ?? "Unknown Artist";
 
   return (
-    <div className="h-full w-full p-1 flex flex-col">
-      <div className="grid grid-rows-1 grid-cols-4 flex-1 grow gap-1">
+    <div className="flex-1 min-h-0 p-1 flex flex-col">
+      <div className="grid grid-rows-1 grid-cols-4 flex-1 grow gap-1 min-h-0">
         <div
           className="col-span-3 flex items-center justify-center rounded-lg transition-colors"
           style={{
@@ -70,8 +73,8 @@ function RouteComponent() {
         >
           <img
             ref={imgRef}
-            // src={coverArt}
-            src="https://marketplace.canva.com/EAGl2RBdUF0/1/0/1600w/canva-dark-green-and-white-modern-lost-in-stars-album-cover-LkSUXx1d-Sw.jpg"
+            src={coverArt}
+            // src="https://marketplace.canva.com/EAGl2RBdUF0/1/0/1600w/canva-dark-green-and-white-modern-lost-in-stars-album-cover-LkSUXx1d-Sw.jpg"
             // src="https://cms-assets.tutsplus.com/cdn-cgi/image/width=360/uploads/users/114/posts/34296/final_image/Final-image.jpg"
             alt="cover art"
             className="rounded-md h-72 aspect-square"
@@ -83,27 +86,30 @@ function RouteComponent() {
             }}
           />
         </div>
-        <div className="col-span-1 bg-neutral-900 rounded-lg">
-          {favorites.map(([name, id]) => (
-            <button
-              onClick={() => {
-                play({
-                  favorite_id: id,
-                  track_info: playing.track_info,
-                });
-              }}
-              key={id}
-              className="bg-neutral-900 px-5 py-4 rounded-r-lg active:bg-neutral-800 truncate font-medium text-white/80 transition-all border-2 border-neutral-800"
-            >
-              {name}
-            </button>
-          ))}
+        <div className="col-span-1 bg-neutral-900 rounded-lg divide-neutral-800 divide-y overflow-y-auto mask-exclude masked-overflow">
+          <div>
+            {favorites.map(([name, id, desc]) => (
+              <button
+                onClick={() => {
+                  play({
+                    favorite_id: id,
+                    track_info: playing.track_info,
+                  });
+                }}
+                key={id}
+                className="px-2 py-4 active:bg-neutral-800 text-neutral-100 truncate transition-all w-full text-left"
+              >
+                <div className="truncate">{name}</div>
+                <span className="text-sm text-neutral-500">{desc}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
       <div className="grid grid-rows-1 grid-cols-4 gap-1">
         <div className="col-span-3 p-2">
-          <h1 className="text-3xl text-white">{title}</h1>
-          <h2 className="text-2xl text-white/50">{artist}</h2>
+          <h1 className="text-3xl text-neutral-100 truncate">{title}</h1>
+          <h2 className="text-2xl text-neutral-500">{artist}</h2>
         </div>
         <div className="col-span-1"></div>
       </div>

@@ -24,17 +24,17 @@ export default function Header() {
   });
   
   return (
-    <div className="text-xl text-white/70 py-2 grid grid-cols-3 px-5">
+    <div className="text-xl text-neutral-500 py-2 grid grid-cols-3 px-5">
       <p>{temperature ? `${temperature}°` : ""}</p>
       <p className="text-center">{shortTimeFormatter.format(time)}</p>
       <p className="flex justify-end items-center">
         {location.pathname !== "/app/settings" ? (
           <Link to="/app/settings">
-            <Settings2 className="w-6 h-6 stroke-white/70" />
+            <Settings2 className="w-6 h-6 text-neutral-500" />
           </Link>
         ) : (
           <Link to="/app/radio">
-            <Home className="w-6 h-6 stroke-white/70" />
+            <Home className="w-6 h-6 text-neutral-500" />
           </Link>
         )}
       </p>

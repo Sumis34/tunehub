@@ -106,7 +106,7 @@ class StateManager:
         """Sync favorites state to all clients"""
         if self._connection_manager:
             favorites_data = [
-                (fav.get("title"), fav.get("id")) for fav in self._favorites
+                (fav.get("title"), fav.get("id"), fav.get("description"), fav.get("album_art")) for fav in self._favorites
             ]
             await self._connection_manager.broadcast(
                 Event(type=self.event_names.FAVORITES.value, data=favorites_data)

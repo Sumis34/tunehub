@@ -1,7 +1,10 @@
 """Action handlers for WebSocket events"""
+import logging
 from state import StateManager
 from connection import ConnectionManager, Event
-from sonos import play_favorite
+from sonos import play_favorite, get_playable_favorites
+
+logger = logging.getLogger(__name__)
 
 async def handle_active_device(manager: ConnectionManager, ws, state: StateManager, data: dict):
     """Handle active device selection"""
@@ -11,6 +14,16 @@ async def handle_active_device(manager: ConnectionManager, ws, state: StateManag
     )
     if matching_device:
         state.active_device = matching_device  # Auto-syncs to all clients
+        
+        # Update favorites for the new active device
+        try:
+            state.favorites = get_playable_favorites(matching_device)
+        except Exception as e:
+            logger.error(f"Failed to get favorites for {device_name}: {e}")
+        
+        # Import here to avoid circular imports
+        from main import _subscribe_to_device_events
+        await _subscribe_to_device_events(matching_device)
     else:
         await manager.send_event(
             Event(type="error", data={"message": "Device not found"}), ws
@@ -30,21 +43,7 @@ async def handle_play(manager: ConnectionManager, ws, state: StateManager, data:
                 Event(type="error", data={"message": "Favorite not found"}), ws
             )
             return
-
-        try:
-            play_favorite(state.active_device, favorite)
-            info = state.active_device.get_current_track_info()
-            await manager.send_event(
-                Event(
-                    type="play",
-                    data={"favorite_id": favorite_id, "track_info": info},
-                ),
-                ws,
-            )
-        except Exception as e:
-            await manager.send_event(
-                Event(type="error", data={"message": f"Playback error: {str(e)}"}), ws
-            )
+        play_favorite(state.active_device, favorite)
     else:
         await manager.send_event(
             Event(type="error", data={"message": "No active device or favorite ID"}), ws

@@ -12,6 +12,8 @@ class Favorite(TypedDict):
   item_class: str
   ref: Any
   id: Optional[str]
+  description: str
+  album_art: Optional[str]
 
 def extract_uri_from_item(item):
     """
@@ -65,6 +67,8 @@ def get_playable_favorites(zone: SoCo) -> List[Favorite]:
     title = getattr(ref, "title", None) or getattr(favorite, "title", None)
     item_class = getattr(ref, "item_class", "") or getattr(favorite, "item_class", "")
     id = getattr(ref, "item_id", None)
+    description = getattr(favorite, "description", None) or "-"
+    album_art = getattr(favorite, "album_art_uri", None) or None
     
     for fav_type in SUPPORTED_FAVORITE_TYPES:
       if bool(item_class and fav_type in item_class):
@@ -79,6 +83,8 @@ def get_playable_favorites(zone: SoCo) -> List[Favorite]:
       "item_class": item_class,
       "ref": ref,
       "id": id,
+      "description": description,
+      "album_art": album_art
     })
 
   return favorites
