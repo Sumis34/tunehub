@@ -3,6 +3,7 @@ import { EventContext, type EventPayloads } from "./event-context";
 
 export function EventProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<Partial<EventPayloads>>({});
+  const [lastEventTime, setLastEventTime] = useState<Date>(new Date());
 
   const setEvent = useCallback(
     <K extends keyof EventPayloads>(key: K, value: EventPayloads[K]) => {
@@ -16,6 +17,8 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
       value={{
         state,
         setEvent,
+        lastEventTime: lastEventTime,
+        setLastEventTime,
       }}
     >
       {children}

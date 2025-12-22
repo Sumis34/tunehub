@@ -20,6 +20,8 @@ export type EventPayloads = {
 export type EventContextValue = {
   state: Partial<EventPayloads>;
   setEvent: <K extends keyof EventPayloads>(key: K, value: EventPayloads[K]) => void;
+  lastEventTime: Date;
+  setLastEventTime: (time: Date) => void;
 };
 
 export const EventContext = createContext<EventContextValue | null>(null);

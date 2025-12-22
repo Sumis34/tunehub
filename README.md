@@ -66,3 +66,9 @@ DISPLAY=:0 nohup chromium http://192.168.1.109:5173 --kiosk --start-fullscreen -
 ### Debugging
 
 - Tripple click the time in the header to reload the window.
+
+## Development
+
+### TODO
+
+- Combine the useEvent hook with the event context to avoid redundant functions and a confusing API.

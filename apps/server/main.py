@@ -100,7 +100,6 @@ async def _subscribe_to_device_events(device) -> None:
             def on_transport_event(event):
                 """Handle transport events (play, pause, track change, etc)"""
                 try:
-                    # Guard: skip if state unavailable or event not from active device
                     if not state or not manager or state.active_device != device:
                         return
 
@@ -111,12 +110,10 @@ async def _subscribe_to_device_events(device) -> None:
                     metadata = event.variables.get("current_track_meta_data")
                     enqueued_metadata = event.variables.get("enqueued_transport_uri_meta_data")
 
-                    # Parse track metadata
                     if metadata and hasattr(metadata, "title") and hasattr(metadata, "creator"):
                         title = metadata.title
                         artist = metadata.creator
 
-                        # Safely build album art URI
                         if hasattr(metadata, "album_art_uri") and metadata.album_art_uri:
                             try:
                                 album_art = state.active_device.music_library.build_album_art_full_uri(
@@ -125,7 +122,6 @@ async def _subscribe_to_device_events(device) -> None:
                             except Exception as e:
                                 logger.debug(f"Failed to build album art URI: {e}")
 
-                    # Fallback for radio streams
                     elif enqueued_metadata and hasattr(enqueued_metadata, "title") and enqueued_metadata.title:
                         if metadata and hasattr(metadata, "stream_content"):
                             title = metadata.stream_content
@@ -134,7 +130,6 @@ async def _subscribe_to_device_events(device) -> None:
 
                         artist = enqueued_metadata.title
 
-                        # Safely build album art for radio
                         if metadata and hasattr(metadata, "album_art_uri") and metadata.album_art_uri:
                             try:
                                 album_art = state.active_device.music_library.build_album_art_full_uri(
@@ -149,7 +144,6 @@ async def _subscribe_to_device_events(device) -> None:
                         "album_art": album_art,
                     }
 
-                    # Store track info and broadcast to all clients
                     state.track_info = track_info
                     broadcast = manager.broadcast(Event(type="play", data={"track_info": track_info}))
                     asyncio.create_task(broadcast)

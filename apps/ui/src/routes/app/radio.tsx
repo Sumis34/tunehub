@@ -24,7 +24,8 @@ function RouteComponent() {
   }>("play", { favorite_id: "", track_info: {} });
 
   const [playbackState, setPlaybackState] = useEvent<{ paused: boolean }>(
-    "pause", { paused: true }
+    "pause",
+    { paused: true }
   );
 
   const imgRef = useRef<HTMLImageElement>(null);
@@ -117,12 +118,12 @@ function RouteComponent() {
         <div className="col-span-1 flex items-center justify-start">
           <button
             onClick={() => setPlaybackState({ paused: !playbackState.paused })}
-            className=""
+            className="bg-neutral-100 rounded-full p-3 active:scale-95 transition-transform"
           >
             {playbackState && playbackState.paused ? (
-              <LucidePause className="stroke-neutral-100 size-14" />
+              <LucidePause className="fill-neutral-900 size-8" />
             ) : (
-              <LucidePlay className="stroke-neutral-100 size-14" />
+              <LucidePlay className="fill-neutral-900 size-8" />
             )}
           </button>
         </div>

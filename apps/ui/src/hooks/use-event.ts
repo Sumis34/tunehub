@@ -33,7 +33,7 @@ export function useEvent<T = unknown>(
   eventName: string,
   initialValue?: T
 ): [T, (value: T) => void, ReadyState] {
-  const { state: ctxState, setEvent } = useEventContext();
+  const { state: ctxState, setEvent, setLastEventTime } = useEventContext();
 
   // Read directly from context; initialize on first render if not present
   const state = (ctxState[eventName] as T | undefined) ?? (initialValue as T);
@@ -47,6 +47,7 @@ export function useEvent<T = unknown>(
   useEffect(() => {
     if (lastJsonMessage && lastJsonMessage.type === eventName) {
       const next = lastJsonMessage.data as T;
+      setLastEventTime(new Date());
       setEvent(eventName as keyof EventPayloads, next as EventPayloads[keyof EventPayloads]);
     }
   }, [lastJsonMessage, eventName, setEvent]);
