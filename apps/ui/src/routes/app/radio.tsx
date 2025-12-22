@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import ColorThief from "colorthief";
 import { useEvent } from "../../hooks/use-event";
-import { LucidePauseCircle, LucidePlayCircle } from "lucide-react";
+import { LucidePause, LucidePlay } from "lucide-react";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "localhost:8000";
 
@@ -120,9 +120,9 @@ function RouteComponent() {
             className=""
           >
             {playbackState && playbackState.paused ? (
-              <LucidePauseCircle className="stroke-neutral-100 size-14" />
+              <LucidePause className="stroke-neutral-100 size-14" />
             ) : (
-              <LucidePlayCircle className="stroke-neutral-100 size-14" />
+              <LucidePlay className="stroke-neutral-100 size-14" />
             )}
           </button>
         </div>

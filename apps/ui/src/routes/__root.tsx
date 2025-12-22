@@ -1,6 +1,7 @@
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useEffect } from "react";
+import { EventProvider } from "../context/event-provider";
 
 const isDebugMode = import.meta.env.VITE_DEBUG_MODE === "true";
 
@@ -18,7 +19,8 @@ const RootLayout = () => {
   }, []);
 
   return (
-    <div className="h-screen w-screen flex flex-col">
+    <EventProvider>
+      <div className="h-screen w-screen flex flex-col">
       {isDebugMode && (
         <div className={`p-2 gap-3 hidden lg:flex bg-indigo-400 border-b`}>
           DEBUG_MODE:
@@ -45,7 +47,8 @@ const RootLayout = () => {
         </div>
       </div>
       <TanStackRouterDevtools />
-    </div>
+      </div>
+    </EventProvider>
   );
 };
 
