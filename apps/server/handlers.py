@@ -9,20 +9,27 @@ logger = logging.getLogger(__name__)
 async def handle_active_device(manager: ConnectionManager, ws, state: StateManager, data: dict):
     """Handle active device selection"""
     device_name = data.get("device_name")
+    previous_device = state.active_device
     matching_device = next(
         (d for d in state.devices if d.player_name == device_name), None
     )
     if matching_device:
         state.active_device = matching_device  # Auto-syncs to all clients
-        
+
         # Update favorites for the new active device
         try:
             state.favorites = get_playable_favorites(matching_device)
         except Exception as e:
             logger.error(f"Failed to get favorites for {device_name}: {e}")
-        
+
         # Import here to avoid circular imports
-        from main import _subscribe_to_device_events
+        from main import _subscribe_to_device_events, _unsubscribe_from_device
+
+        # Unsubscribe from previous device
+        if previous_device and previous_device.player_name != matching_device.player_name:
+            await _unsubscribe_from_device(previous_device.player_name, stop_listener=False)
+
+        # Subscribe to new device
         await _subscribe_to_device_events(matching_device)
     else:
         await manager.send_event(

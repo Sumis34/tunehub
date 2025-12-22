@@ -18,6 +18,7 @@ class StateManager:
         self._devices: List[SoCo] = []
         self._active_device: Optional[SoCo] = None
         self._favorites: List[Favorite] = []
+        self._track_info: dict = {"title": None, "artist": None, "album_art": None}
         self._connection_manager: ConnectionManager = cm
         self.event_names = EventTypes
 
@@ -64,6 +65,17 @@ class StateManager:
         """Set favorites and auto-sync"""
         self._favorites = value
         self._trigger_sync(self.event_names.FAVORITES.value, self.sync_favorites)
+
+    @property
+    def track_info(self) -> dict:
+        """Get current track info"""
+        return self._track_info
+
+    @track_info.setter
+    def track_info(self, value: dict):
+        """Set track info and auto-sync"""
+        self._track_info = value
+        self._trigger_sync("play", self.sync_track_info)
 
     def _trigger_sync(self, key: str, sync_func):
         """Trigger async sync immediately if connection manager exists."""
@@ -112,9 +124,17 @@ class StateManager:
                 Event(type=self.event_names.FAVORITES.value, data=favorites_data)
             )
 
+    async def sync_track_info(self):
+        """Sync current track info to all clients"""
+        if self._connection_manager:
+            await self._connection_manager.broadcast(
+                Event(type="play", data={"track_info": self._track_info})
+            )
+
     async def sync_all(self):
         """Sync all state values to all clients"""
         await self.sync_volume()
         await self.sync_devices()
         await self.sync_active_device()
         await self.sync_favorites()
+        await self.sync_track_info()

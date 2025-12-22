@@ -24,108 +24,194 @@ soco.config.EVENTS_MODULE = events_asyncio
 manager: ConnectionManager | None = None
 state: StateManager | None = None
 subscriptions: dict = {}
+subscriptions_lock = asyncio.Lock()
+
+# Subscription retry configuration
+MAX_SUBSCRIPTION_RETRIES = 3
+SUBSCRIPTION_RETRY_BASE_DELAY = 2.0  # seconds
 
 async def _discover_devices_async() -> list:
     """Discover Sonos devices in thread pool to avoid blocking"""
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, lambda: list(soco.discover() or []))
 
-async def _subscribe_to_device_events(device, ws) -> None:
+
+async def _unsubscribe_from_device(device_name: str, stop_listener: bool = False) -> None:
+    """Unsubscribe from a single device's event streams."""
+    async with subscriptions_lock:
+        subs = subscriptions.pop(device_name, None)
+
+    if not subs:
+        return
+
     try:
-        device_name = device.player_name
-        if device_name in subscriptions:
-            logger.info(f"Already subscribed to {device_name}")
-            return
-
-        logger.info(f"Subscribing to events from {device_name}")
-        
-        sub_rendering = await device.renderingControl.subscribe()
-        sub_transport = await device.avTransport.subscribe()
-        
-        def on_rendering_event(event):
-            """Handle rendering control events (volume, mute, etc)"""
-            try:
-                if state and "Volume" in event.variables:
-                    volume = event.variables.get("Volume", {}).get("Master")
-                    if volume is not None:
-                        logger.debug(f"Volume event from {device_name}: {volume}")
-                        # Optionally sync volume to clients
-                        state.volume = int(volume)
-            except Exception as e:
-                logger.error(f"Error handling rendering event: {e}")
-        
-        def on_transport_event(event):
-            """Handle transport events (play, pause, track change, etc)"""
-            title = None
-            artist = None
-            album_art = None
-            parent_name = None
-            parent_art = None
-
-            if not state and state.active_device == device:
-                return
-            
-            metadata = event.variables.get("current_track_meta_data")
-            enqueued_metadata = event.variables.get("enqueued_transport_uri_meta_data")
-
-            if metadata and hasattr(metadata, "title") and hasattr(metadata, "creator") and hasattr(metadata, "album_art_uri"):
-                title = metadata.title
-                artist = metadata.creator
-                album_art = state.active_device.music_library.build_album_art_full_uri(
-                    metadata.album_art_uri
-                )
-
-            # Applies to radio streams where title/artist are in stream_content
-            elif enqueued_metadata and enqueued_metadata.title:
-                if hasattr(metadata, "stream_content"):
-                    title = metadata.stream_content
-                else:
-                    title = enqueued_metadata.title
-
-                artist = enqueued_metadata.title
-                album_art = state.active_device.music_library.build_album_art_full_uri(
-                    metadata.album_art_uri
-                )
-
-            send_event = manager.send_event(Event(type="play", data={
-                "track_info": {
-                    "title": title,
-                    "artist": artist,
-                    "album_art": album_art,
-                }
-            }), ws)
-
-            asyncio.create_task(send_event)
-        
-        sub_rendering.callback = on_rendering_event
-        sub_transport.callback = on_transport_event
-        
-        subscriptions[device_name] = {
-            "rendering": sub_rendering,
-            "transport": sub_transport,
-        }
-        logger.info(f"Subscribed to {device_name}")
+        logger.info(f"Unsubscribing from {device_name}")
+        await subs["rendering"].unsubscribe()
+        await subs["transport"].unsubscribe()
     except Exception as e:
-        logger.error(f"Failed to subscribe to {device}: {e}")
+        logger.error(f"Error unsubscribing from {device_name}: {e}")
 
+    if not stop_listener or subscriptions:
+        # Only stop event listener when explicitly requested and no subscriptions remain
+        return
 
-async def _unsubscribe_from_all_devices() -> None:
-    """Unsubscribe from all device events"""
-    for device_name, subs in subscriptions.items():
-        try:
-            logger.info(f"Unsubscribing from {device_name}")
-            await subs["rendering"].unsubscribe()
-            await subs["transport"].unsubscribe()
-        except Exception as e:
-            logger.error(f"Error unsubscribing from {device_name}: {e}")
-    
-    subscriptions.clear()
-    
     try:
         await events_asyncio.event_listener.async_stop()
         logger.info("Event listener stopped")
     except Exception as e:
         logger.error(f"Error stopping event listener: {e}")
+
+
+async def _subscribe_to_device_events(device) -> None:
+    """
+    Subscribe to a device's rendering and transport events.
+    Events are broadcast to all connected clients.
+    Includes retry logic with exponential backoff.
+    """
+    device_name = device.player_name
+
+    for attempt in range(MAX_SUBSCRIPTION_RETRIES):
+        try:
+            # Check if already subscribed
+            async with subscriptions_lock:
+                if device_name in subscriptions:
+                    logger.info(f"Already subscribed to {device_name}")
+                    return
+
+            logger.info(f"Subscribing to {device_name} (attempt {attempt + 1}/{MAX_SUBSCRIPTION_RETRIES})")
+
+            sub_rendering = await device.renderingControl.subscribe()
+            sub_transport = await device.avTransport.subscribe()
+
+            def on_rendering_event(event):
+                """Handle rendering control events (volume, mute, etc)"""
+                try:
+                    if not state or not manager:
+                        return
+
+                    if "Volume" in event.variables:
+                        volume = event.variables.get("Volume", {}).get("Master")
+                        if volume is not None:
+                            logger.debug(f"Volume event from {device_name}: {volume}")
+                            state.volume = int(volume)
+                except Exception as e:
+                    logger.error(f"Error handling rendering event from {device_name}: {e}")
+
+            def on_transport_event(event):
+                """Handle transport events (play, pause, track change, etc)"""
+                try:
+                    # Guard: skip if state unavailable or event not from active device
+                    if not state or not manager or state.active_device != device:
+                        return
+
+                    title = None
+                    artist = None
+                    album_art = None
+
+                    metadata = event.variables.get("current_track_meta_data")
+                    enqueued_metadata = event.variables.get("enqueued_transport_uri_meta_data")
+
+                    # Parse track metadata
+                    if metadata and hasattr(metadata, "title") and hasattr(metadata, "creator"):
+                        title = metadata.title
+                        artist = metadata.creator
+
+                        # Safely build album art URI
+                        if hasattr(metadata, "album_art_uri") and metadata.album_art_uri:
+                            try:
+                                album_art = state.active_device.music_library.build_album_art_full_uri(
+                                    metadata.album_art_uri
+                                )
+                            except Exception as e:
+                                logger.debug(f"Failed to build album art URI: {e}")
+
+                    # Fallback for radio streams
+                    elif enqueued_metadata and hasattr(enqueued_metadata, "title") and enqueued_metadata.title:
+                        if metadata and hasattr(metadata, "stream_content"):
+                            title = metadata.stream_content
+                        else:
+                            title = enqueued_metadata.title
+
+                        artist = enqueued_metadata.title
+
+                        # Safely build album art for radio
+                        if metadata and hasattr(metadata, "album_art_uri") and metadata.album_art_uri:
+                            try:
+                                album_art = state.active_device.music_library.build_album_art_full_uri(
+                                    metadata.album_art_uri
+                                )
+                            except Exception as e:
+                                logger.debug(f"Failed to build album art URI for radio: {e}")
+
+                    track_info = {
+                        "title": title,
+                        "artist": artist,
+                        "album_art": album_art,
+                    }
+
+                    # Store track info and broadcast to all clients
+                    state.track_info = track_info
+                    broadcast = manager.broadcast(Event(type="play", data={"track_info": track_info}))
+                    asyncio.create_task(broadcast)
+
+                except Exception as e:
+                    logger.error(f"Error handling transport event from {device_name}: {e}")
+
+            sub_rendering.callback = on_rendering_event
+            sub_transport.callback = on_transport_event
+
+            async with subscriptions_lock:
+                subscriptions[device_name] = {
+                    "rendering": sub_rendering,
+                    "transport": sub_transport,
+                }
+
+            logger.info(f"Successfully subscribed to {device_name}")
+            return
+
+        except Exception as e:
+            logger.warning(f"Subscription attempt {attempt + 1} failed for {device_name}: {e}")
+
+            if attempt < MAX_SUBSCRIPTION_RETRIES - 1:
+                delay = SUBSCRIPTION_RETRY_BASE_DELAY * (2 ** attempt)
+                logger.info(f"Retrying in {delay}s...")
+                await asyncio.sleep(delay)
+            else:
+                logger.error(f"Failed to subscribe to {device_name} after {MAX_SUBSCRIPTION_RETRIES} attempts")
+
+
+async def _unsubscribe_from_all_devices(stop_listener: bool = True) -> None:
+    """Unsubscribe from all device events and optionally stop event listener"""
+    async with subscriptions_lock:
+        items = list(subscriptions.items())
+        subscriptions.clear()
+
+    # Unsubscribe with timeout to prevent hanging during shutdown
+    for device_name, subs in items:
+        try:
+            await asyncio.wait_for(
+                asyncio.gather(
+                    subs["rendering"].unsubscribe(),
+                    subs["transport"].unsubscribe(),
+                    return_exceptions=True
+                ),
+                timeout=2.0
+            )
+        except asyncio.TimeoutError:
+            pass  # Silently skip on timeout during shutdown
+        except Exception:
+            pass  # Suppress all exceptions during shutdown
+
+    if not stop_listener:
+        return
+
+    try:
+        await asyncio.wait_for(
+            events_asyncio.event_listener.async_stop(),
+            timeout=3.0
+        )
+    except (asyncio.TimeoutError, Exception):
+        pass  # Suppress all exceptions during shutdown
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -148,9 +234,14 @@ async def lifespan(app: FastAPI):
     
     yield
     
-    # Shutdown
-    logger.info("Shutting down TuneHub server...")
-    await _unsubscribe_from_all_devices()
+    print("Shutting down TuneHub server...", flush=True)
+    try:
+        await asyncio.wait_for(_unsubscribe_from_all_devices(), timeout=5.0)
+        print("Shutdown complete", flush=True)
+    except asyncio.TimeoutError:
+        print("Shutdown timed out, forcing exit", flush=True)
+    except Exception:
+        pass
 
 
 app = FastAPI(title="TuneHub", lifespan=lifespan)
@@ -177,10 +268,10 @@ async def websocket_endpoint(ws: WebSocket):
 
     if state.active_device:
         state.favorites = get_playable_favorites(state.active_device)
-        await _subscribe_to_device_events(state.active_device, ws)
+        await _subscribe_to_device_events(state.active_device)
 
     try:
-        # Sync current state to new client
+        # Sync current state to new client (including cached track info)
         await state.sync_all()
 
         # Main message loop
@@ -189,11 +280,16 @@ async def websocket_endpoint(ws: WebSocket):
             action = Action(**msg)
             logger.debug(f"Received action: {action.type}")
             await dispatch_action(action.type, manager, ws, state, action.data)
-    
+
     except WebSocketDisconnect:
         manager.disconnect(ws)
-        # await _unsubscribe_from_all_devices()
         logger.info(f"Client disconnected. Active connections: {len(manager.active_connections)}")
+
+        # Cleanup subscriptions when last client disconnects
+        if not manager.active_connections:
+            logger.info("Last client disconnected, unsubscribing from all devices")
+            await _unsubscribe_from_all_devices(stop_listener=True)
+
     except Exception as e:
         logger.error(f"WebSocket error: {e}")
         manager.disconnect(ws)
