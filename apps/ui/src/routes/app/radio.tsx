@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import ColorThief from "colorthief";
-import { useEvent } from "../../hooks/use-event";
 import { LucidePause, LucidePlay } from "lucide-react";
+import { usePlayer } from "../../hooks/use-player";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "localhost:8000";
 
@@ -14,22 +14,12 @@ function RouteComponent() {
   const [dominantColorValues, setDominantColorValues] = useState<
     number[] | null
   >(null);
-  const [favorites] = useEvent<Array<[string, string, string, string]>>(
-    "favorites",
-    []
-  );
-  const [playing, play] = useEvent<{
-    favorite_id: string;
-    track_info?: Record<string, string>;
-  }>("play", { favorite_id: "", track_info: {} });
 
-  const [playbackState, setPlaybackState] = useEvent<{ paused: boolean }>(
-    "pause",
-    { paused: true }
-  );
+  const { favorites, currentTrack, play, playbackState, togglePlaybackState } =
+    usePlayer();
 
   const imgRef = useRef<HTMLImageElement>(null);
-  const coverArt = `${API_BASE}/proxy?url=${encodeURIComponent(playing.track_info?.album_art || "")}`;
+  const coverArt = `${API_BASE}/proxy?url=${encodeURIComponent(currentTrack.track_info?.album_art || "")}`;
 
   const extractColor = () => {
     if (!imgRef.current) return;
@@ -63,8 +53,8 @@ function RouteComponent() {
   const shadow = `0px 0px 50px 10px rgba(${dominantColorValues?.slice(0, 3).join(",")},0.5)`;
   const bgColor = `rgba(${dominantColorValues?.join(",")})`;
 
-  const title = playing.track_info?.title ?? "Unknown Track";
-  const artist = playing.track_info?.artist ?? "Unknown Artist";
+  const title = currentTrack.track_info?.title ?? "Unknown Track";
+  const artist = currentTrack.track_info?.artist ?? "Unknown Artist";
 
   return (
     <div className="flex-1 min-h-0 p-1 flex flex-col">
@@ -97,7 +87,6 @@ function RouteComponent() {
                 onClick={() => {
                   play({
                     favorite_id: id,
-                    track_info: playing.track_info,
                   });
                 }}
                 key={id}
@@ -117,7 +106,7 @@ function RouteComponent() {
         </div>
         <div className="col-span-1 flex items-center justify-start">
           <button
-            onClick={() => setPlaybackState({ paused: !playbackState.paused })}
+            onClick={() => togglePlaybackState()}
             className="bg-neutral-100 rounded-full p-3 active:scale-95 transition-transform"
           >
             {playbackState && playbackState.paused ? (

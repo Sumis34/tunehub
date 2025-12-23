@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import Header from "../../components/header";
 import { useEffect } from "react";
-import { useEventContext } from "../../hooks/use-event-context";
+import { usePlayer } from "../../hooks/use-player";
 
 const STAND_BY_TIMEOUT_MS = 7 * 60 * 1000; // 7 minutes
 
@@ -11,8 +11,8 @@ export const Route = createFileRoute("/app")({
 
 function MainLayoutComponent() {
   const navigate = useNavigate();
-  
-  const { lastEventTime } = useEventContext();
+
+  const { lastEventTime } = usePlayer();
 
   useEffect(() => {
     const interval = setInterval(() => {

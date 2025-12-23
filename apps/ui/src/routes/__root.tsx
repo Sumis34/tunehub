@@ -1,7 +1,7 @@
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useEffect } from "react";
-import { EventProvider } from "../context/event-provider";
+import { EventProvider } from "../context/player-provider";
 
 const isDebugMode = import.meta.env.VITE_DEBUG_MODE === "true";
 
