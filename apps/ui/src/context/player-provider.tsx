@@ -13,11 +13,8 @@ export interface SocketEvent<T = unknown> {
 export function EventProvider({ children }: { children: React.ReactNode }) {
   const [volume, setVolume] = useState<number>(50);
   const [devices, setDevices] = useState<string[]>([]);
-  const [activeDevice, setActiveDevice] = useState<
-    PlayerContextValue["activeDevice"]
-  >({
-    device_name: null,
-  });
+  const [activeDevice, setActiveDevice] =
+    useState<PlayerContextValue["activeDevice"]>();
   const [currentTrack, setCurrentTrack] = useState<
     PlayerContextValue["currentTrack"]
   >({

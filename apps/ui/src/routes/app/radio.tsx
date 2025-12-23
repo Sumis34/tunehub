@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import ColorThief from "colorthief";
 import { LucidePause, LucidePlay } from "lucide-react";
 import { usePlayer } from "../../hooks/use-player";
+import NoDeviceSelected from "../../context/no-deivce-selected";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "localhost:8000";
 
@@ -15,8 +16,14 @@ function RouteComponent() {
     number[] | null
   >(null);
 
-  const { favorites, currentTrack, play, playbackState, togglePlaybackState } =
-    usePlayer();
+  const {
+    favorites,
+    currentTrack,
+    play,
+    playbackState,
+    togglePlaybackState,
+    activeDevice,
+  } = usePlayer();
 
   const imgRef = useRef<HTMLImageElement>(null);
   const coverArt = `${API_BASE}/proxy?url=${encodeURIComponent(currentTrack.track_info?.album_art || "")}`;
@@ -55,6 +62,10 @@ function RouteComponent() {
 
   const title = currentTrack.track_info?.title ?? "Unknown Track";
   const artist = currentTrack.track_info?.artist ?? "Unknown Artist";
+
+  if (!activeDevice) {
+    return <NoDeviceSelected />;
+  }
 
   return (
     <div className="flex-1 min-h-0 p-1 flex flex-col">

@@ -16,14 +16,12 @@ function MainLayoutComponent() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (
-        new Date().getTime() - lastEventTime.getTime() <
-        STAND_BY_TIMEOUT_MS
-      ) return 
-      
-        navigate({
-          to: "/screen-saver",
-        });
+      if (new Date().getTime() - lastEventTime.getTime() < STAND_BY_TIMEOUT_MS)
+        return;
+
+      navigate({
+        to: "/screen-saver",
+      });
     }, 5 * 1000);
 
     return () => clearInterval(interval);

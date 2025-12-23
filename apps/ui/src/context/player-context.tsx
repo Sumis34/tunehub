@@ -9,7 +9,7 @@ export type TrackInfo = {
 export type PlayerContextValue = {
   volume: number;
   devices: string[];
-  activeDevice: { device_name: string | null };
+  activeDevice?: { device_name: string };
   favorites: Array<[string, string, string, string]>;
   playbackState: { paused: boolean };
   lastEventTime: Date;

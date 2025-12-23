@@ -31,7 +31,7 @@ function RouteComponent() {
           <Tabs.Panel className="text-neutral-100" value="speaker">
             <h1 className="text-2xl font-bold">Speaker</h1>
             <div className="w-full flex bg-neutral-800 rounded-md mt-5 p-5 gap-3 items-center">
-              {activeDevice.device_name ? (
+              {activeDevice ? (
                 <>
                   <AudioBars playing={!playbackState.paused} />
                   <p className="text-2xl font-semibold text-blue-400">
@@ -50,7 +50,7 @@ function RouteComponent() {
               </h2>
               <div className="flex flex-col gap-3">
                 {devices
-                  .filter((d) => d !== activeDevice.device_name)
+                  .filter((d) => d !== activeDevice?.device_name)
                   .map((d) => (
                     <button
                       key={d}

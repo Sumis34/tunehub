@@ -20,7 +20,7 @@ const RootLayout = () => {
 
   return (
     <EventProvider>
-      <div className="h-screen w-screen flex flex-col">
+      <div className="h-screen w-screen flex flex-col font-roboto">
       {isDebugMode && (
         <div className={`p-2 gap-3 hidden lg:flex bg-indigo-400 border-b`}>
           DEBUG_MODE:

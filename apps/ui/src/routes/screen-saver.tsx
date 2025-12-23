@@ -43,10 +43,10 @@ function RouteComponent() {
       className="bg-black w-full h-full flex items-center justify-center"
     >
       <div className="text-center">
-        <h1 className="text-9xl text-white">
+        <h1 className="text-9xl text-neutral-100">
           {shortTimeFormatter.format(time)}
         </h1>
-        <h2 className="text-3xl text-white/50">
+        <h2 className="text-3xl text-neutral-400">
           {shortDateFormatter.format(time)}
         </h2>
       </div>
