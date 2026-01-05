@@ -120,7 +120,7 @@ function RouteComponent() {
             onClick={() => togglePlaybackState()}
             className="bg-neutral-100 rounded-full p-3 active:scale-95 transition-transform"
           >
-            {playbackState && playbackState.paused ? (
+            {playbackState && playbackState.isPlaying ? (
               <LucidePause className="fill-neutral-900 size-8" />
             ) : (
               <LucidePlay className="fill-neutral-900 size-8" />

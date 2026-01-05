@@ -264,6 +264,8 @@ async def websocket_endpoint(ws: WebSocket):
         state.favorites = get_playable_favorites(state.active_device)
         await _subscribe_to_device_events(state.active_device)
 
+    state.playback_state = state.active_device.get_current_transport_info().get("current_transport_state") 
+
     try:
         # Sync current state to new client (including cached track info)
         await state.sync_all()

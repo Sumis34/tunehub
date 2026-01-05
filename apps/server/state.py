@@ -3,7 +3,7 @@ import asyncio
 from fastapi import WebSocket
 from soco import SoCo
 from connection import ConnectionManager, Event
-from sonos import Favorite
+from sonos import Favorite, is_playing
 from enum import Enum
 
 class EventTypes(Enum):
@@ -11,6 +11,7 @@ class EventTypes(Enum):
     DEVICES = "devices"
     ACTIVE_DEVICE = "active-device"
     FAVORITES = "favorites"
+    PLAYBACK_STATE = "playback-state"
 
 class StateManager:
     def __init__(self, cm: ConnectionManager):
@@ -20,6 +21,7 @@ class StateManager:
         self._favorites: List[Favorite] = []
         self._track_info: dict = {"title": None, "artist": None, "album_art": None}
         self._connection_manager: ConnectionManager = cm
+        self._playback_state = ""
         self.event_names = EventTypes
 
     @property
@@ -76,6 +78,23 @@ class StateManager:
         """Set track info and auto-sync"""
         self._track_info = value
         self._trigger_sync("play", self.sync_track_info)
+    
+    @property
+    def playback_state(self) -> bool:
+        return self._playback_state
+    @playback_state.setter
+    def playback_state(self, value: str):
+        self._playback_state = value
+        self._trigger_sync(self.event_names.PLAYBACK_STATE.value, self.sync_playback_state)
+    
+    async def sync_playback_state(self):
+        data = {
+            "isPlaying": self.playback_state == "PLAYING",
+        }
+        if self._connection_manager:
+            await self._connection_manager.broadcast(
+                Event(type=self.event_names.PLAYBACK_STATE.value, data=data)
+            )
 
     def _trigger_sync(self, key: str, sync_func):
         """Trigger async sync immediately if connection manager exists."""
@@ -138,3 +157,4 @@ class StateManager:
         await self.sync_active_device()
         await self.sync_favorites()
         await self.sync_track_info()
+        await self.sync_playback_state()

@@ -11,7 +11,7 @@ export type PlayerContextValue = {
   devices: string[];
   activeDevice?: { device_name: string };
   favorites: Array<[string, string, string, string]>;
-  playbackState: { paused: boolean };
+  playbackState: { isPlaying: boolean };
   lastEventTime: Date;
   currentTrack: {
     favorite_id?: string;

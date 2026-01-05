@@ -27,7 +27,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
 
   const [playbackState, setPlaybackState] = useState<
     PlayerContextValue["playbackState"]
-  >({ paused: true });
+  >({ isPlaying: false });
 
   const [lastEventTime, setLastEventTime] = useState<Date>(new Date());
 
@@ -62,7 +62,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
           lastJsonMessage.data as PlayerContextValue["currentTrack"]
         );
         break;
-      case "pause":
+      case "playback-state":
         setPlaybackState(
           lastJsonMessage.data as PlayerContextValue["playbackState"]
         );
@@ -71,7 +71,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
         setFavorites(lastJsonMessage.data as PlayerContextValue["favorites"]);
         break;
       default:
-        console.log("Unknown event");
+        console.log("Unknown event: ", lastJsonMessage);
         break;
     }
 
@@ -91,9 +91,9 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
   );
 
   const togglePlaybackState = useCallback(() => {
-    const newState = !playbackState.paused;
-    setPlaybackState({ paused: newState });
-    sendJsonMessage({ type: "pause", data: { paused: newState } });
+    const newState = !playbackState.isPlaying;
+    setPlaybackState({ isPlaying: newState });
+    sendJsonMessage({ type: "playback-toggle", data: { isPlaying: newState } });
   }, [playbackState, sendJsonMessage]);
 
   const changeActiveDevice = useCallback(

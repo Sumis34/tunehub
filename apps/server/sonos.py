@@ -141,3 +141,8 @@ def get_favorite(favorites: List[Favorite], title: str) -> Optional[Favorite]:
     if fav.get("title") == title:
       return fav
   return None
+
+def is_playing(zone: SoCo) -> bool:
+    if zone:
+        return zone.get_current_transport_info().get("current_transport_state") == "PLAYING"
+    return False
