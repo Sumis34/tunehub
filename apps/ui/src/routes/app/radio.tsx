@@ -5,7 +5,7 @@ import { LucidePause, LucidePlay } from "lucide-react";
 import { usePlayer } from "../../hooks/use-player";
 import NoDeviceSelected from "../../context/no-deivce-selected";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "localhost:8000";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 export const Route = createFileRoute("/app/radio")({
   component: RouteComponent,
@@ -66,6 +66,9 @@ function RouteComponent() {
   if (!activeDevice) {
     return <NoDeviceSelected />;
   }
+
+  console.log(playbackState);
+  
 
   return (
     <div className="flex-1 min-h-0 p-1 flex flex-col">
