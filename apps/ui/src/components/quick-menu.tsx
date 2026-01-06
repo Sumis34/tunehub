@@ -1,17 +1,21 @@
-import { animate, useMotionValue, motion, type PanInfo } from "framer-motion";
+import {
+  animate,
+  useMotionValue,
+  motion,
+  type PanInfo,
+} from "framer-motion";
 
 export default function QuickMenu({ children }: { children: React.ReactNode }) {
-  const y = useMotionValue(0);
-  // useMotionValueEvent(y, "change", (latest) => console.log(latest));
-
-  const DRAG_AREA_HEIGHT = 100;
+  const DRAG_AREA_HEIGHT = 44;
   const TOP_BUFFER_HEIGHT = 200;
 
-  const SCREEN_HEIGHT = window.innerHeight; // total vertical travel
-  const THRESHOLD = SCREEN_HEIGHT * 0.1; // 25%
+  const SCREEN_HEIGHT = window.innerHeight;
+  const THRESHOLD = SCREEN_HEIGHT * 0.1;
   const TOP_OFF_SCREEN = -SCREEN_HEIGHT - TOP_BUFFER_HEIGHT + DRAG_AREA_HEIGHT;
   const BOTTOM = -TOP_BUFFER_HEIGHT;
   const BOTTOM_DRAG_CONSTRAINT = BOTTOM + 20;
+
+  const y = useMotionValue(TOP_OFF_SCREEN);
 
   const handleDragEnd = (
     _event: MouseEvent | TouchEvent | PointerEvent,
@@ -72,13 +76,14 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
         }}
         dragElastic={0}
         onDragEnd={handleDragEnd}
-        onClick={(e) => {
-          e.preventDefault();
-          // e.stopPropagation();
-        }}
         className="w-full absolute pb-32 inset-0 pointer"
       >
-        <div className="w-screen bg-red-500 h-full" />
+        <div className="w-screen bg-neutral-900 h-full flex flex-col items-center rounded-b-xl">
+          <div className="flex-1"></div>
+          <div className="p-4">
+            <div className="w-24 h-2 bg-neutral-800 rounded-full" />
+          </div>
+        </div>
       </motion.div>
       {children}
     </div>
