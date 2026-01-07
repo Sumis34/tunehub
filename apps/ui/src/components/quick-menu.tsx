@@ -1,4 +1,13 @@
-import { animate, useMotionValue, motion, type PanInfo } from "framer-motion";
+import {
+  animate,
+  useMotionValue,
+  motion,
+  type PanInfo,
+  useMotionValueEvent,
+  useTransform,
+} from "framer-motion";
+import { useState } from "react";
+import { createPortal } from "react-dom";
 
 export default function QuickMenu({ children }: { children: React.ReactNode }) {
   const OPEN_HEIGHT = 0.2;
@@ -11,6 +20,12 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
   const paddingTop = h * OPEN_HEIGHT;
 
   const y = useMotionValue(closed);
+  const opacity = useTransform(y, [closed, open], [0, 0.5]);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useMotionValueEvent(y, "change", (latest) => {
+    setIsOpen(latest > closed + 1);
+  });
 
   const handleDragEnd = (
     _event: MouseEvent | TouchEvent | PointerEvent,
@@ -34,26 +49,50 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="relative">
-      <motion.div
-        drag="y"
-        style={{ paddingBottom: HANDLE_HEIGHT, height: h + HANDLE_HEIGHT, y }}
-        dragConstraints={{ top: closed, bottom: open + 20 }}
-        dragElastic={0}
-        onDragEnd={handleDragEnd}
-        className="absolute inset-0 pointer"
-      >
-        <div
-          style={{
-            paddingTop,
-          }}
-          className="bg-neutral-900 h-full flex flex-col items-center rounded-b-xl"
-        >
-          <div className="flex-1">asd</div>
-          <div className="p-4">
-            <div className="w-24 h-2 bg-neutral-800 rounded-full" />
-          </div>
-        </div>
-      </motion.div>
+      {createPortal(
+        <>
+          {isOpen && (
+            <motion.div
+              onClick={() => {
+                animate(y, closed, {
+                  type: "spring",
+                  stiffness: 600,
+                  damping: 50,
+                });
+              }}
+              style={{
+                opacity,
+              }}
+              className="fixed inset-0 bg-black"
+            />
+          )}
+          <motion.div
+            drag="y"
+            style={{
+              paddingBottom: HANDLE_HEIGHT,
+              height: h + HANDLE_HEIGHT,
+              y,
+            }}
+            dragConstraints={{ top: closed, bottom: open + 20 }}
+            dragElastic={0}
+            onDragEnd={handleDragEnd}
+            className="fixed inset-0 z-10"
+          >
+            <div
+              style={{
+                paddingTop,
+              }}
+              className="bg-neutral-900 h-full flex flex-col items-center rounded-b-xl"
+            >
+              <div className="flex-1">asd</div>
+              <div className="p-4">
+                <div className="w-24 h-2 bg-neutral-800 rounded-full" />
+              </div>
+            </div>
+          </motion.div>
+        </>,
+        document.body
+      )}
       {children}
     </div>
   );
