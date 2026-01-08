@@ -88,12 +88,23 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
               }}
               className="bg-neutral-950 h-full flex flex-col items-center rounded-b-xl"
             >
-              <div className="flex-1">
-                asd
-                <Button>
-                  Test Button
-                </Button>
+              <div className="flex-1 grid grid-rows-4 grid-cols-2 p-4 gap-2">
+                <Button>Test Button</Button>
+                <Button>Test Button</Button>
+                <Button>Test Button</Button>
+                <Button>Test Button</Button>
                 <input
+                  className="col-span-2"
+                  type="range"
+                  onPointerDown={() => {
+                    setShouldDrag(false);
+                  }}
+                  onPointerUp={() => {
+                    setShouldDrag(true);
+                  }}
+                />
+                <input
+                  className="col-span-2"
                   type="range"
                   onPointerDown={() => {
                     setShouldDrag(false);
