@@ -8,6 +8,7 @@ import {
 } from "framer-motion";
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import Button from "../ui/button";
 
 export default function QuickMenu({ children }: { children: React.ReactNode }) {
   const OPEN_HEIGHT = 0.2;
@@ -21,6 +22,9 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
 
   const y = useMotionValue(closed);
   const opacity = useTransform(y, [closed, open], [0, 0.5]);
+
+  const [shouldDrag, setShouldDrag] = useState(true);
+
   const [isOpen, setIsOpen] = useState(false);
 
   useMotionValueEvent(y, "change", (latest) => {
@@ -67,7 +71,7 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
             />
           )}
           <motion.div
-            drag="y"
+            drag={shouldDrag ? "y" : false}
             style={{
               paddingBottom: HANDLE_HEIGHT,
               height: h + HANDLE_HEIGHT,
@@ -82,9 +86,24 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
               style={{
                 paddingTop,
               }}
-              className="bg-neutral-900 h-full flex flex-col items-center rounded-b-xl"
+              className="bg-neutral-950 h-full flex flex-col items-center rounded-b-xl"
             >
-              <div className="flex-1">asd</div>
+              <div className="flex-1">
+                asd
+                <Button>
+                  Test Button
+                </Button>
+                <input
+                  type="range"
+                  onPointerDown={() => {
+                    setShouldDrag(false);
+                  }}
+                  onPointerUp={() => {
+                    setShouldDrag(true);
+                  }}
+                />
+                <input type="text" />
+              </div>
               <div className="p-4">
                 <div className="w-24 h-2 bg-neutral-800 rounded-full" />
               </div>
