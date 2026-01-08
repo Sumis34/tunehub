@@ -28,7 +28,7 @@ subscriptions_lock = asyncio.Lock()
 
 # Subscription retry configuration
 MAX_SUBSCRIPTION_RETRIES = 3
-SUBSCRIPTION_RETRY_BASE_DELAY = 2.0  # seconds
+SUBSCRIPTION_RETRY_BASE_DELAY = 2.0
 
 async def _discover_devices_async() -> list:
     """Discover Sonos devices in thread pool to avoid blocking"""
@@ -109,6 +109,7 @@ async def _subscribe_to_device_events(device) -> None:
 
                     metadata = event.variables.get("current_track_meta_data")
                     enqueued_metadata = event.variables.get("enqueued_transport_uri_meta_data")
+                    transport_state = event.variables.get("transport_state")
 
                     if metadata and hasattr(metadata, "title") and hasattr(metadata, "creator"):
                         title = metadata.title
@@ -145,8 +146,7 @@ async def _subscribe_to_device_events(device) -> None:
                     }
 
                     state.track_info = track_info
-                    broadcast = manager.broadcast(Event(type="play", data={"track_info": track_info}))
-                    asyncio.create_task(broadcast)
+                    state.playback_state = transport_state
 
                 except Exception as e:
                     logger.error(f"Error handling transport event from {device_name}: {e}")
@@ -220,7 +220,7 @@ async def lifespan(app: FastAPI):
     try:
         devices = await _discover_devices_async()
         state.devices = devices
-        state.active_device = devices[0] if devices else None
+        # state.active_device = devices[0] if devices else None
         
         logger.info(f"Discovered {len(devices)} device(s)")
     except Exception as e:
@@ -262,9 +262,8 @@ async def websocket_endpoint(ws: WebSocket):
 
     if state.active_device:
         state.favorites = get_playable_favorites(state.active_device)
+        state.playback_state = state.active_device.get_current_transport_info().get("current_transport_state") 
         await _subscribe_to_device_events(state.active_device)
-
-    state.playback_state = state.active_device.get_current_transport_info().get("current_transport_state") 
 
     try:
         # Sync current state to new client (including cached track info)

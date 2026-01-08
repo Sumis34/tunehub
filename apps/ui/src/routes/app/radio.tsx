@@ -46,27 +46,16 @@ function RouteComponent() {
     }
   };
 
-  // const [volume, setVolume, readyState] = useEvent("volume");
-
-  // const connectionStatus = {
-  //   [ReadyState.CONNECTING]: "Connecting",
-  //   [ReadyState.OPEN]: "Open",
-  //   [ReadyState.CLOSING]: "Closing",
-  //   [ReadyState.CLOSED]: "Closed",
-  //   [ReadyState.UNINSTANTIATED]: "Uninstantiated",
-  // }[readyState];
-
-  // const gradient = `linear-gradient(180deg, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 1) 0%, rgba(${dominantColorValues?.slice(0, 3).join(",")}, 0) 100%)`;
   const shadow = `0px 0px 50px 10px rgba(${dominantColorValues?.slice(0, 3).join(",")},0.5)`;
   const bgColor = `rgba(${dominantColorValues?.join(",")})`;
 
   const title = currentTrack.track_info?.title ?? "Unknown Track";
   const artist = currentTrack.track_info?.artist ?? "Unknown Artist";
 
-  if (!activeDevice) {
+  if (!activeDevice?.device_name) {
     return <NoDeviceSelected />;
   }
-  
+
   return (
     <div className="flex-1 min-h-0 p-1 flex flex-col">
       <div className="grid grid-rows-1 grid-cols-3 flex-1 grow gap-1 min-h-0">
