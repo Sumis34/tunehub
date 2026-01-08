@@ -24,7 +24,7 @@ export default function Header() {
   });
 
   return (
-    <div className="text-xl text-neutral-500 py-2 grid grid-cols-3 px-5">
+    <div className="text-xl text-neutral-100 py-2 grid grid-cols-3 px-5">
       <p>{temperature ? `${temperature}°` : ""}</p>
       <p
         className="text-center"
@@ -39,11 +39,11 @@ export default function Header() {
       <p className="flex justify-end items-center">
         {location.pathname !== "/app/settings" ? (
           <Link to="/app/settings">
-            <Settings2 className="w-6 h-6 text-neutral-500" />
+            <Settings2 className="w-6 h-6 text-neutral-100" />
           </Link>
         ) : (
           <Link to="/app/radio">
-            <Home className="w-6 h-6 text-neutral-500" />
+            <Home className="w-6 h-6 text-neutral-100" />
           </Link>
         )}
       </p>

@@ -33,7 +33,7 @@ function RouteComponent() {
             <div className="w-full flex bg-neutral-800 rounded-md mt-5 p-5 gap-3 items-center">
               {activeDevice ? (
                 <>
-                  <AudioBars playing={!playbackState.paused} />
+                  <AudioBars playing={!playbackState.isPlaying} />
                   <p className="text-2xl font-semibold text-blue-400">
                     {activeDevice.device_name}
                   </p>

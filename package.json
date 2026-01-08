@@ -1,5 +1,6 @@
 {
-	"name": "@repo/ui",
+	"name": "@repo/root",
+	"type": "module",
 	"version": "0.0.0",
 	"packageManager": "pnpm@9.2.0",
 	"scripts": {
