@@ -59,12 +59,19 @@ async def handle_play(manager: ConnectionManager, ws, state: StateManager, data:
 async def handle_volume(manager: ConnectionManager, ws, state: StateManager, data: dict):
     """Handle volume adjustment"""
     new_volume = data.get("volume")
+
     if isinstance(new_volume, int) and 0 <= new_volume <= 100:
         state.volume = new_volume  # Auto-syncs to all clients
     else:
         await manager.send_event(
             Event(type="error", data={"message": "Invalid volume"}), ws
         )
+
+    if (state.active_device is None):
+        return
+    
+    state.active_device.set_relative_volume(new_volume - state.active_device.volume)
+    
 
 async def handle_playback_toggle(manager: ConnectionManager, ws, state: StateManager, data: dict):
     """Handle pause action"""

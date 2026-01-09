@@ -10,9 +10,6 @@ echo "[*] Creating app directory at $APP_DIR..."
 sudo mkdir -p "$APP_DIR"
 sudo chown -R "$USER_NAME":"$USER_NAME" "$APP_DIR"
 
-echo "[*] Change permission of start.sh to be executable..."
-chmod +x start.sh
-
 echo "[*] Moving source files to $APP_DIR..."
 shopt -s dotglob nullglob
 for item in *; do
@@ -48,6 +45,17 @@ if [ -f requirements.txt ]; then
 else
     echo "[!] No requirements.txt found — skipping dependency install"
 fi
+
+echo "[*] Setting up labwc autostart for Chromium..."
+AUTOSTART_DIR="/home/$USER_NAME/.config/labwc"
+mkdir -p "$AUTOSTART_DIR"
+cat > "$AUTOSTART_DIR/autostart" <<'EOF'
+# TuneHub browser autostart
+sleep 25
+chromium http://localhost:8000 --kiosk --noerrdialogs --disable-infobars --no-first-run --enable-features=OverlayScrollbar --start-maximized &
+EOF
+chown "$USER_NAME":"$USER_NAME" "$AUTOSTART_DIR/autostart"
+chmod +x "$AUTOSTART_DIR/autostart"
 
 echo "[*] Enabling the $SERVICE_NAME service..."
 sudo systemctl enable "$SERVICE_NAME"

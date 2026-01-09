@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AppRouteRouteImport } from './routes/app/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppSettingsRouteImport } from './routes/app/settings'
+import { Route as AppSelectDeviceRouteImport } from './routes/app/select-device'
 import { Route as AppRadioRouteImport } from './routes/app/radio'
 
 const ScreenSaverRoute = ScreenSaverRouteImport.update({
@@ -41,6 +42,11 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppSelectDeviceRoute = AppSelectDeviceRouteImport.update({
+  id: '/select-device',
+  path: '/select-device',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppRadioRoute = AppRadioRouteImport.update({
   id: '/radio',
   path: '/radio',
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/screen-saver': typeof ScreenSaverRoute
   '/app/radio': typeof AppRadioRoute
+  '/app/select-device': typeof AppSelectDeviceRoute
   '/app/settings': typeof AppSettingsRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/screen-saver': typeof ScreenSaverRoute
   '/app/radio': typeof AppRadioRoute
+  '/app/select-device': typeof AppSelectDeviceRoute
   '/app/settings': typeof AppSettingsRoute
 }
 export interface FileRoutesById {
@@ -70,6 +78,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/screen-saver': typeof ScreenSaverRoute
   '/app/radio': typeof AppRadioRoute
+  '/app/select-device': typeof AppSelectDeviceRoute
   '/app/settings': typeof AppSettingsRoute
 }
 export interface FileRouteTypes {
@@ -80,9 +89,17 @@ export interface FileRouteTypes {
     | '/about'
     | '/screen-saver'
     | '/app/radio'
+    | '/app/select-device'
     | '/app/settings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app' | '/about' | '/screen-saver' | '/app/radio' | '/app/settings'
+  to:
+    | '/'
+    | '/app'
+    | '/about'
+    | '/screen-saver'
+    | '/app/radio'
+    | '/app/select-device'
+    | '/app/settings'
   id:
     | '__root__'
     | '/'
@@ -90,6 +107,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/screen-saver'
     | '/app/radio'
+    | '/app/select-device'
     | '/app/settings'
   fileRoutesById: FileRoutesById
 }
@@ -137,6 +155,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/app/select-device': {
+      id: '/app/select-device'
+      path: '/select-device'
+      fullPath: '/app/select-device'
+      preLoaderRoute: typeof AppSelectDeviceRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/app/radio': {
       id: '/app/radio'
       path: '/radio'
@@ -149,11 +174,13 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteRouteChildren {
   AppRadioRoute: typeof AppRadioRoute
+  AppSelectDeviceRoute: typeof AppSelectDeviceRoute
   AppSettingsRoute: typeof AppSettingsRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppRadioRoute: AppRadioRoute,
+  AppSelectDeviceRoute: AppSelectDeviceRoute,
   AppSettingsRoute: AppSettingsRoute,
 }
 

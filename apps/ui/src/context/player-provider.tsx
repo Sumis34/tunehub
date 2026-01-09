@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { PlayerContext, type PlayerContextValue } from "./player-context";
 import useWebSocket from "react-use-websocket";
+import { useDebouncedCallback } from "../hooks/use-debounce";
 
 const SOCKET_URL =
   import.meta.env.VITE_WEBSOCKET_URL || "ws://localhost:8000/ws";
@@ -107,12 +108,21 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
     [sendJsonMessage]
   );
 
+  const syncVolumeChange = useDebouncedCallback<[number]>((val) => {
+    sendJsonMessage({
+      type: "volume",
+      data: {
+        volume: val,
+      },
+    });
+  }, 500);
+
   const changeVolume = useCallback(
     (newVolume: number) => {
       setVolume(newVolume);
-      sendJsonMessage({ type: "volume", data: newVolume });
+      syncVolumeChange(newVolume);
     },
-    [sendJsonMessage]
+    [setVolume, syncVolumeChange]
   );
 
   return (

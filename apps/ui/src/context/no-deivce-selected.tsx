@@ -1,7 +1,11 @@
 import { Speaker } from "lucide-react";
 import { usePlayer } from "../hooks/use-player";
 
-export default function NoDeviceSelected() {
+export default function NoDeviceSelected({
+  onSelectDevice,
+}: {
+  onSelectDevice?: () => void;
+}) {
   const { devices, changeActiveDevice } = usePlayer();
 
   return (
@@ -21,7 +25,10 @@ export default function NoDeviceSelected() {
           <ul className="divide-neutral-800 divide-y">
             {devices.map((device) => (
               <button
-                onClick={() => changeActiveDevice(device)}
+                onClick={() => {
+                  changeActiveDevice(device);
+                  onSelectDevice?.();
+                }}
                 key={device}
                 className="py-4 px-2 flex items-center gap-1 active:bg-neutral-800 text-neutral-100 text-2xl transition-all w-full text-left rounded-2xl font-semibold"
               >

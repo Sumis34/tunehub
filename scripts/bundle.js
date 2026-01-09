@@ -38,7 +38,6 @@ copyFolder(pyDist, rootDist);
 
 fs.copyFileSync("install.sh", path.join(rootDist, "install.sh"));
 fs.copyFileSync("uninstall.sh", path.join(rootDist, "uninstall.sh"));
-fs.copyFileSync("start.sh", path.join(rootDist, "start.sh"));
 fs.copyFileSync("tunehubd.service", path.join(rootDist, "tunehubd.service"));
 
 console.log("Merged UI + Python dist into /dist");

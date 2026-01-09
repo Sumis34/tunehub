@@ -6,12 +6,16 @@ import {
   useMotionValueEvent,
   useTransform,
 } from "framer-motion";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Button from "../ui/button";
+import { useNavigate } from "@tanstack/react-router";
+import { MoonStar, Speaker, SunDim, Volume2 } from "lucide-react";
+import TouchSlider from "./slider";
+import { usePlayer } from "../hooks/use-player";
 
 export default function QuickMenu({ children }: { children: React.ReactNode }) {
-  const OPEN_HEIGHT = 0.2;
+  const OPEN_HEIGHT = 0.4;
   const HANDLE_HEIGHT = 44;
   const SNAP_THRESHOLD = 0.1;
 
@@ -22,8 +26,9 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
 
   const y = useMotionValue(closed);
   const opacity = useTransform(y, [closed, open], [0, 0.5]);
-
-  const [shouldDrag, setShouldDrag] = useState(true);
+  const navigate = useNavigate();
+  const ref = useRef<HTMLDivElement>(null);
+  const { changeVolume, volume } = usePlayer();
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -51,6 +56,20 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
     animate(y, target, { type: "spring", stiffness: 600, damping: 50 });
   };
 
+  const close = () => {
+    animate(y, closed, { type: "spring", stiffness: 600, damping: 50 });
+  };
+
+  const openMenu = () => {
+    animate(y, open, { type: "spring", stiffness: 600, damping: 50 });
+  };
+
+  const shouldDrag = () => {
+    if (!ref.current) return true;
+    const draggingChild = ref.current.querySelector("[data-dragging='true']");
+    return !draggingChild;
+  };
+
   return (
     <div className="relative">
       {createPortal(
@@ -71,7 +90,7 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
             />
           )}
           <motion.div
-            drag={shouldDrag ? "y" : false}
+            drag={shouldDrag() ? "y" : false}
             style={{
               paddingBottom: HANDLE_HEIGHT,
               height: h + HANDLE_HEIGHT,
@@ -81,6 +100,13 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
             dragElastic={0}
             onDragEnd={handleDragEnd}
             className="fixed inset-0 z-10"
+            onClick={() => {
+              if (isOpen) {
+                return;
+              }
+              openMenu();
+            }}
+            ref={ref}
           >
             <div
               style={{
@@ -88,32 +114,33 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
               }}
               className="bg-neutral-950 h-full flex flex-col items-center rounded-b-xl"
             >
-              <div className="flex-1 grid grid-rows-4 grid-cols-2 p-4 gap-2">
-                <Button>Test Button</Button>
-                <Button>Test Button</Button>
-                <Button>Test Button</Button>
-                <Button>Test Button</Button>
-                <input
-                  className="col-span-2"
-                  type="range"
-                  onPointerDown={() => {
-                    setShouldDrag(false);
+              <div className="flex-1 grid grid-rows-2 grid-cols-2 p-4 gap-4 w-full container mx-auto max-w-sm">
+                <Button
+                  onClick={() => {
+                    navigate({ to: "/app/select-device" });
+                    close();
                   }}
-                  onPointerUp={() => {
-                    setShouldDrag(true);
+                >
+                  <Speaker className="h-12 w-12 m-auto" />
+                </Button>
+                <Button
+                  onClick={() => {
+                    navigate({ to: "/screen-saver" });
+                    close();
                   }}
-                />
-                <input
-                  className="col-span-2"
-                  type="range"
-                  onPointerDown={() => {
-                    setShouldDrag(false);
-                  }}
-                  onPointerUp={() => {
-                    setShouldDrag(true);
-                  }}
-                />
-                <input type="text" />
+                >
+                  <MoonStar className="h-12 w-12 m-auto" />
+                </Button>
+                <div className="col-span-2 flex flex-col gap-4">
+                  <TouchSlider
+                    value={volume}
+                    onValueChange={(val) => changeVolume(val)}
+                    icon={<Volume2 className="h-6 w-6 stroke-neutral-800" />}
+                  />
+                  <TouchSlider
+                    icon={<SunDim className="h-6 w-6 stroke-neutral-800" />}
+                  />
+                </div>
               </div>
               <div className="p-4">
                 <div className="w-24 h-2 bg-neutral-800 rounded-full" />

@@ -5,9 +5,8 @@ After=network.target
 [Service]
 User=noe
 WorkingDirectory=/opt/tunehub
-ExecStart=/opt/tunehub/start.sh
+ExecStart=/opt/tunehub/venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8000
 Restart=always
-RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
