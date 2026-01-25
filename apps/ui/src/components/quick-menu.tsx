@@ -10,7 +10,7 @@ import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Button from "../ui/button";
 import { useNavigate } from "@tanstack/react-router";
-import { MoonStar, Speaker, SunDim, Volume2 } from "lucide-react";
+import { MoonStar, Speaker, Volume2 } from "lucide-react";
 import TouchSlider from "./slider";
 import { usePlayer } from "../hooks/use-player";
 
@@ -137,9 +137,9 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
                     onValueChange={(val) => changeVolume(val)}
                     icon={<Volume2 className="h-6 w-6 stroke-neutral-800" />}
                   />
-                  <TouchSlider
+                  {/* <TouchSlider
                     icon={<SunDim className="h-6 w-6 stroke-neutral-800" />}
-                  />
+                  /> */}
                 </div>
               </div>
               <div className="p-4">

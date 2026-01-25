@@ -26,10 +26,10 @@ export default function TouchSlider({
       </div>
       <Slider.Control>
         <Slider.Track
-          className={"bg-neutral-800 w-full h-8 rounded-full overflow-hidden"}
+          className={"bg-neutral-800 w-full h-14 rounded-xl overflow-hidden"}
         >
           <Slider.Indicator
-            className={"bg-neutral-100 h-8 rounded-full "}
+            className={"bg-neutral-100 h-14 rounded-xl "}
           ></Slider.Indicator>
           <Slider.Thumb className={""} />
         </Slider.Track>
