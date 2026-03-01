@@ -5,7 +5,9 @@ import { LucidePause, LucidePlay } from "lucide-react";
 import { usePlayer } from "../../hooks/use-player";
 import NoDeviceSelected from "../../context/no-deivce-selected";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  (typeof window !== "undefined" ? window.location.origin : "http://localhost:8000");
 
 export const Route = createFileRoute("/app/radio")({
   component: RouteComponent,

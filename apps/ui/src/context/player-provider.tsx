@@ -4,7 +4,10 @@ import useWebSocket from "react-use-websocket";
 import { useDebouncedCallback } from "../hooks/use-debounce";
 
 const SOCKET_URL =
-  import.meta.env.VITE_WEBSOCKET_URL || "ws://localhost:8000/ws";
+  import.meta.env.VITE_WEBSOCKET_URL ||
+  (typeof window !== "undefined"
+    ? `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/ws`
+    : "ws://localhost:8000/ws");
 
 export interface SocketEvent<T = unknown> {
   type: string;
