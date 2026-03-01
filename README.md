@@ -27,15 +27,59 @@ Some of the caveats are that a fairly recent Raspberry Pi is required to run the
 
 ## Installation
 
+### Hardware Specific Setup
+
+This setup is meant for Pi OS Lite Trixie and the [3.5inch DPI LCD](https://www.waveshare.com/wiki/3.5inch_DPI_LCD?srsltid=AfmBOoqEQ8b2K71XAvbje4K5-Gjc011bOH9yJL84BaxcW-uSN3YL_Jjs) screen.
+
+1. Follow the instructions in the [Waveshare Wiki](https://www.waveshare.com/wiki/3.5inch_DPI_LCD?srsltid=AfmBOoqEQ8b2K71XAvbje4K5-Gjc011bOH9yJL84BaxcW-uSN3YL_Jjs).
+
+1. Install Chromium and xserver-xorg:
+
+```bash
+sudo apt update
+sudo apt full-upgrade -y
+
+sudo apt install --no-install-recommends \
+  xserver-xorg-core \
+  xserver-xorg-video-all \
+  xserver-xorg-input-all \
+  xinit \
+  x11-xserver-utils \
+  chromium \
+  unclutter
+```
+
+1. Enable autologin.
+
+```bash
+sudo raspi-config
+# Auto login > Console Autologin > Yes
+```
+
+1. Auto-Start X Only on the Physical Console
+
+```bash
+nano ~/.bash_profile
+```
+
+Add:
+
+```bash
+if [ -z "$DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
+  startx -- -nocursor
+fi
+```
+
 ### Prerequisites
 
 - A Raspberry Pi (preferably Raspberry Pi 4 or newer) with Raspberry Pi OS installed.
 - A touchscreen display connected to the Raspberry Pi.
 - Python installed on the Raspberry Pi.
+- Hardware setup as described in the [Hardware Specific Setup](#hardware-specific-setup) section.
 
 ### Steps
 
-1. Clone the repository:
+1. Clone the repository on your local machine:
 
 ```bash
 git clone https://github.com/sumis34/tunehub.git
@@ -76,7 +120,7 @@ ssh noe@pi
 1. Run the installation script:
 
 ```bash
-cd tunehub && ./install.sh
+cd tunehub && dos2unix install.sh && chmod +x install.sh && ./install.sh
 ```
 
 1. Verify that the TuneHub service is running:
