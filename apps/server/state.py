@@ -12,6 +12,9 @@ class EventTypes(Enum):
     ACTIVE_DEVICE = "active-device"
     FAVORITES = "favorites"
     PLAYBACK_STATE = "playback-state"
+    WIFI_NETWORKS = "wifi-networks"
+    WIFI_STATUS = "wifi-status"
+    WIFI_RESULT = "wifi-result"
 
 class StateManager:
     def __init__(self, cm: ConnectionManager):
@@ -22,6 +25,22 @@ class StateManager:
         self._track_info: dict = {"title": None, "artist": None, "album_art": None}
         self._connection_manager: ConnectionManager = cm
         self._playback_state = ""
+        self._wifi_networks: List[dict] = []
+        self._wifi_status: dict = {
+            "connected": False,
+            "ssid": None,
+            "device": None,
+            "ip": "10.42.0.1",
+            "signal": None,
+            "mode": "ap",
+            "apSsid": "TuneHub-Setup",
+            "manageUrl": "http://10.42.0.1:8000/config/wifi",
+        }
+        self._wifi_result: dict = {
+            "ok": True,
+            "action": None,
+            "message": "",
+        }
         self.event_names = EventTypes
 
     @property
@@ -80,12 +99,39 @@ class StateManager:
         self._trigger_sync("play", self.sync_track_info)
     
     @property
-    def playback_state(self) -> bool:
+    def playback_state(self) -> str:
         return self._playback_state
     @playback_state.setter
     def playback_state(self, value: str):
         self._playback_state = value
         self._trigger_sync(self.event_names.PLAYBACK_STATE.value, self.sync_playback_state)
+
+    @property
+    def wifi_networks(self) -> List[dict]:
+        return self._wifi_networks
+
+    @wifi_networks.setter
+    def wifi_networks(self, value: List[dict]):
+        self._wifi_networks = value
+        self._trigger_sync(self.event_names.WIFI_NETWORKS.value, self.sync_wifi_networks)
+
+    @property
+    def wifi_status(self) -> dict:
+        return self._wifi_status
+
+    @wifi_status.setter
+    def wifi_status(self, value: dict):
+        self._wifi_status = value
+        self._trigger_sync(self.event_names.WIFI_STATUS.value, self.sync_wifi_status)
+
+    @property
+    def wifi_result(self) -> dict:
+        return self._wifi_result
+
+    @wifi_result.setter
+    def wifi_result(self, value: dict):
+        self._wifi_result = value
+        self._trigger_sync(self.event_names.WIFI_RESULT.value, self.sync_wifi_result)
     
     async def sync_playback_state(self):
         data = {
@@ -94,6 +140,24 @@ class StateManager:
         if self._connection_manager:
             await self._connection_manager.broadcast(
                 Event(type=self.event_names.PLAYBACK_STATE.value, data=data)
+            )
+
+    async def sync_wifi_networks(self):
+        if self._connection_manager:
+            await self._connection_manager.broadcast(
+                Event(type=self.event_names.WIFI_NETWORKS.value, data=self._wifi_networks)
+            )
+
+    async def sync_wifi_status(self):
+        if self._connection_manager:
+            await self._connection_manager.broadcast(
+                Event(type=self.event_names.WIFI_STATUS.value, data=self._wifi_status)
+            )
+
+    async def sync_wifi_result(self):
+        if self._connection_manager:
+            await self._connection_manager.broadcast(
+                Event(type=self.event_names.WIFI_RESULT.value, data=self._wifi_result)
             )
 
     def _trigger_sync(self, key: str, sync_func):
@@ -158,3 +222,6 @@ class StateManager:
         await self.sync_favorites()
         await self.sync_track_info()
         await self.sync_playback_state()
+        await self.sync_wifi_networks()
+        await self.sync_wifi_status()
+        await self.sync_wifi_result()

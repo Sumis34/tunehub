@@ -3,6 +3,7 @@ import logging
 from state import StateManager
 from connection import ConnectionManager, Event
 from sonos import play_favorite, get_playable_favorites
+import wifi
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +88,65 @@ async def handle_playback_toggle(manager: ConnectionManager, ws, state: StateMan
             Event(type="error", data={"message": "No active device"}), ws
         )
 
+
+async def handle_wifi_scan(manager: ConnectionManager, ws, state: StateManager, data: dict):
+    try:
+        state.wifi_networks = await wifi.scan_networks()
+    except wifi.WifiError as e:
+        await manager.send_event(Event(type="wifi-result", data={"ok": False, "message": str(e)}), ws)
+
+
+async def handle_wifi_status(manager: ConnectionManager, ws, state: StateManager, data: dict):
+    try:
+        state.wifi_status = await wifi.get_status()
+    except wifi.WifiError as e:
+        await manager.send_event(Event(type="wifi-result", data={"ok": False, "message": str(e)}), ws)
+
+
+async def handle_wifi_connect(manager: ConnectionManager, ws, state: StateManager, data: dict):
+    ssid = data.get("ssid")
+    password = data.get("password")
+
+    try:
+        state.wifi_status = await wifi.connect(str(ssid or ""), str(password) if password else None)
+        state.wifi_networks = await wifi.scan_networks()
+        state.wifi_result = {
+            "ok": True,
+            "action": "connect",
+            "message": f"Connected to {state.wifi_status.get('ssid') or ssid}",
+        }
+    except wifi.WifiError as e:
+        await manager.send_event(Event(type="wifi-result", data={"ok": False, "action": "connect", "message": str(e)}), ws)
+
+
+async def handle_wifi_disconnect(manager: ConnectionManager, ws, state: StateManager, data: dict):
+    try:
+        state.wifi_status = await wifi.disconnect()
+        state.wifi_networks = await wifi.scan_networks()
+        state.wifi_result = {
+            "ok": True,
+            "action": "disconnect",
+            "message": "Disconnected from Wi-Fi",
+        }
+    except wifi.WifiError as e:
+        await manager.send_event(Event(type="wifi-result", data={"ok": False, "action": "disconnect", "message": str(e)}), ws)
+
+
+async def handle_wifi_forget(manager: ConnectionManager, ws, state: StateManager, data: dict):
+    ssid = data.get("ssid")
+
+    try:
+        await wifi.forget(str(ssid or ""))
+        state.wifi_networks = await wifi.scan_networks()
+        state.wifi_status = await wifi.get_status()
+        state.wifi_result = {
+            "ok": True,
+            "action": "forget",
+            "message": f"Forgot {ssid}",
+        }
+    except wifi.WifiError as e:
+        await manager.send_event(Event(type="wifi-result", data={"ok": False, "action": "forget", "message": str(e)}), ws)
+
 async def dispatch_action(
     action_type: str,
     manager: ConnectionManager,
@@ -104,6 +164,16 @@ async def dispatch_action(
             await handle_volume(manager, ws, state, data)
         case "playback-toggle":
             await handle_playback_toggle(manager, ws, state, data)
+        case "wifi-scan":
+            await handle_wifi_scan(manager, ws, state, data)
+        case "wifi-status":
+            await handle_wifi_status(manager, ws, state, data)
+        case "wifi-connect":
+            await handle_wifi_connect(manager, ws, state, data)
+        case "wifi-disconnect":
+            await handle_wifi_disconnect(manager, ws, state, data)
+        case "wifi-forget":
+            await handle_wifi_forget(manager, ws, state, data)
         case _:
             await manager.send_event(
                 Event(type="error", data={"message": "Unknown action"}), ws

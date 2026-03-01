@@ -328,7 +328,7 @@ async def proxy_image(url: str = Query(..., description="URL to proxy")):
             return Response(status_code=404)
 
 
-@app.get("/")
+@app.get("/{full_path:path}")
 async def root():
     """Serve frontend index.html"""
     return FileResponse('index.html')

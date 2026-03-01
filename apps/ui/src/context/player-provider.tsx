@@ -25,6 +25,22 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
   const [favorites, setFavorites] = useState<PlayerContextValue["favorites"]>(
     []
   );
+  const [wifiNetworks, setWifiNetworks] = useState<
+    PlayerContextValue["wifiNetworks"]
+  >([]);
+  const [wifiStatus, setWifiStatus] = useState<PlayerContextValue["wifiStatus"]>(
+    {
+      connected: false,
+      ssid: null,
+      device: null,
+      ip: "10.42.0.1",
+      signal: null,
+      mode: "ap",
+      apSsid: "TuneHub-Setup",
+      manageUrl: "http://10.42.0.1:8000/config/wifi",
+    }
+  );
+  const [wifiResult, setWifiResult] = useState<PlayerContextValue["wifiResult"]>();
 
   const [playbackState, setPlaybackState] = useState<
     PlayerContextValue["playbackState"]
@@ -70,6 +86,15 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
         break;
       case "favorites":
         setFavorites(lastJsonMessage.data as PlayerContextValue["favorites"]);
+        break;
+      case "wifi-networks":
+        setWifiNetworks(lastJsonMessage.data as PlayerContextValue["wifiNetworks"]);
+        break;
+      case "wifi-status":
+        setWifiStatus(lastJsonMessage.data as PlayerContextValue["wifiStatus"]);
+        break;
+      case "wifi-result":
+        setWifiResult(lastJsonMessage.data as PlayerContextValue["wifiResult"]);
         break;
       default:
         console.log("Unknown event: ", lastJsonMessage);
@@ -125,6 +150,43 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
     [setVolume, syncVolumeChange]
   );
 
+  const scanWifi = useCallback(() => {
+    sendJsonMessage({ type: "wifi-scan", data: {} });
+  }, [sendJsonMessage]);
+
+  const refreshWifiStatus = useCallback(() => {
+    sendJsonMessage({ type: "wifi-status", data: {} });
+  }, [sendJsonMessage]);
+
+  const connectWifi = useCallback(
+    (ssid: string, password?: string) => {
+      sendJsonMessage({
+        type: "wifi-connect",
+        data: {
+          ssid,
+          password,
+        },
+      });
+    },
+    [sendJsonMessage]
+  );
+
+  const disconnectWifi = useCallback(() => {
+    sendJsonMessage({ type: "wifi-disconnect", data: {} });
+  }, [sendJsonMessage]);
+
+  const forgetWifi = useCallback(
+    (ssid: string) => {
+      sendJsonMessage({
+        type: "wifi-forget",
+        data: {
+          ssid,
+        },
+      });
+    },
+    [sendJsonMessage]
+  );
+
   return (
     <PlayerContext.Provider
       value={{
@@ -135,10 +197,18 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
         favorites,
         currentTrack,
         playbackState,
+        wifiNetworks,
+        wifiStatus,
+        wifiResult,
         changeActiveDevice,
         changeVolume,
         togglePlaybackState,
         play,
+        scanWifi,
+        refreshWifiStatus,
+        connectWifi,
+        disconnectWifi,
+        forgetWifi,
       }}
     >
       {children}

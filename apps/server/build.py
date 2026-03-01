@@ -13,6 +13,7 @@ INCLUDE_FILES = [
     "handlers.py",
     "sonos.py",
     "state.py",
+    "wifi.py",
 ]
 
 # Directories you actually have — adjust this for YOUR repo

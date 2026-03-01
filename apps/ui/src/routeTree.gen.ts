@@ -13,7 +13,9 @@ import { Route as ScreenSaverRouteImport } from './routes/screen-saver'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AppRouteRouteImport } from './routes/app/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ConfigWifiRouteImport } from './routes/config/wifi'
 import { Route as AppSettingsRouteImport } from './routes/app/settings'
+import { Route as AppSelectWifiRouteImport } from './routes/app/select-wifi'
 import { Route as AppSelectDeviceRouteImport } from './routes/app/select-device'
 import { Route as AppRadioRouteImport } from './routes/app/radio'
 
@@ -37,9 +39,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConfigWifiRoute = ConfigWifiRouteImport.update({
+  id: '/config/wifi',
+  path: '/config/wifi',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppSelectWifiRoute = AppSelectWifiRouteImport.update({
+  id: '/select-wifi',
+  path: '/select-wifi',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const AppSelectDeviceRoute = AppSelectDeviceRouteImport.update({
@@ -60,7 +72,9 @@ export interface FileRoutesByFullPath {
   '/screen-saver': typeof ScreenSaverRoute
   '/app/radio': typeof AppRadioRoute
   '/app/select-device': typeof AppSelectDeviceRoute
+  '/app/select-wifi': typeof AppSelectWifiRoute
   '/app/settings': typeof AppSettingsRoute
+  '/config/wifi': typeof ConfigWifiRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -69,7 +83,9 @@ export interface FileRoutesByTo {
   '/screen-saver': typeof ScreenSaverRoute
   '/app/radio': typeof AppRadioRoute
   '/app/select-device': typeof AppSelectDeviceRoute
+  '/app/select-wifi': typeof AppSelectWifiRoute
   '/app/settings': typeof AppSettingsRoute
+  '/config/wifi': typeof ConfigWifiRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -79,7 +95,9 @@ export interface FileRoutesById {
   '/screen-saver': typeof ScreenSaverRoute
   '/app/radio': typeof AppRadioRoute
   '/app/select-device': typeof AppSelectDeviceRoute
+  '/app/select-wifi': typeof AppSelectWifiRoute
   '/app/settings': typeof AppSettingsRoute
+  '/config/wifi': typeof ConfigWifiRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -90,7 +108,9 @@ export interface FileRouteTypes {
     | '/screen-saver'
     | '/app/radio'
     | '/app/select-device'
+    | '/app/select-wifi'
     | '/app/settings'
+    | '/config/wifi'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -99,7 +119,9 @@ export interface FileRouteTypes {
     | '/screen-saver'
     | '/app/radio'
     | '/app/select-device'
+    | '/app/select-wifi'
     | '/app/settings'
+    | '/config/wifi'
   id:
     | '__root__'
     | '/'
@@ -108,7 +130,9 @@ export interface FileRouteTypes {
     | '/screen-saver'
     | '/app/radio'
     | '/app/select-device'
+    | '/app/select-wifi'
     | '/app/settings'
+    | '/config/wifi'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -116,6 +140,7 @@ export interface RootRouteChildren {
   AppRouteRoute: typeof AppRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
   ScreenSaverRoute: typeof ScreenSaverRoute
+  ConfigWifiRoute: typeof ConfigWifiRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -148,11 +173,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/config/wifi': {
+      id: '/config/wifi'
+      path: '/config/wifi'
+      fullPath: '/config/wifi'
+      preLoaderRoute: typeof ConfigWifiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/settings': {
       id: '/app/settings'
       path: '/settings'
       fullPath: '/app/settings'
       preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/select-wifi': {
+      id: '/app/select-wifi'
+      path: '/select-wifi'
+      fullPath: '/app/select-wifi'
+      preLoaderRoute: typeof AppSelectWifiRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/app/select-device': {
@@ -175,12 +214,14 @@ declare module '@tanstack/react-router' {
 interface AppRouteRouteChildren {
   AppRadioRoute: typeof AppRadioRoute
   AppSelectDeviceRoute: typeof AppSelectDeviceRoute
+  AppSelectWifiRoute: typeof AppSelectWifiRoute
   AppSettingsRoute: typeof AppSettingsRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppRadioRoute: AppRadioRoute,
   AppSelectDeviceRoute: AppSelectDeviceRoute,
+  AppSelectWifiRoute: AppSelectWifiRoute,
   AppSettingsRoute: AppSettingsRoute,
 }
 
@@ -193,6 +234,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRouteRoute: AppRouteRouteWithChildren,
   AboutRoute: AboutRoute,
   ScreenSaverRoute: ScreenSaverRoute,
+  ConfigWifiRoute: ConfigWifiRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
