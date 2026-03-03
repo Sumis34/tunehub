@@ -39,5 +39,10 @@ copyFolder(pyDist, rootDist);
 fs.copyFileSync("install.sh", path.join(rootDist, "install.sh"));
 fs.copyFileSync("uninstall.sh", path.join(rootDist, "uninstall.sh"));
 fs.copyFileSync("tunehubd.service", path.join(rootDist, "tunehubd.service"));
+fs.copyFileSync("wificonnect.service", path.join(rootDist, "wificonnect.service"));
+fs.copyFileSync(
+  "start-wifi-connect.sh",
+  path.join(rootDist, "start-wifi-connect.sh")
+);
 
 console.log("Merged UI + Python dist into /dist");
