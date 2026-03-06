@@ -6,7 +6,7 @@ export default function NoDeviceSelected({
 }: {
   onSelectDevice?: () => void;
 }) {
-  const { devices, changeActiveDevice } = usePlayer();
+  const { devices, changeActiveDevice, scanDevices } = usePlayer();
 
   return (
     <div className="grid grid-cols-2 flex-1 text-neutral-100 p-5 gap-5">
@@ -18,9 +18,15 @@ export default function NoDeviceSelected({
       </div>
       <div className="bg-neutral-900 rounded-lg p-5">
         {devices.length === 0 ? (
-          <p className="text-neutral-500 text-xl text-center">
-            No Sonos devices found in current network.
-          </p>
+          <button
+            onClick={() => {
+              scanDevices();
+            }}
+            className="text-neutral-500 text-xl text-center"
+          >
+            No Sonos devices found in current network. Click to refresh and try
+            again.
+          </button>
         ) : (
           <ul className="divide-neutral-800 divide-y">
             {devices.map((device) => (

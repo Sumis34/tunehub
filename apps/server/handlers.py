@@ -2,7 +2,8 @@
 import logging
 from state import StateManager
 from connection import ConnectionManager, Event
-from sonos import play_favorite, get_playable_favorites
+from sonos import play_favorite, get_playable_favorites, discover
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +36,6 @@ async def handle_active_device(manager: ConnectionManager, ws, state: StateManag
         await manager.send_event(
             Event(type="error", data={"message": "Device not found"}), ws
         )
-
 
 async def handle_play(manager: ConnectionManager, ws, state: StateManager, data: dict):
     """Handle play favorite action"""
@@ -70,8 +70,7 @@ async def handle_volume(manager: ConnectionManager, ws, state: StateManager, dat
     if (state.active_device is None):
         return
     
-    state.active_device.set_relative_volume(new_volume - state.active_device.volume)
-    
+    state.active_device.set_relative_volume(new_volume - state.active_device.volume)   
 
 async def handle_playback_toggle(manager: ConnectionManager, ws, state: StateManager, data: dict):
     """Handle pause action"""
@@ -86,6 +85,16 @@ async def handle_playback_toggle(manager: ConnectionManager, ws, state: StateMan
         await manager.send_event(
             Event(type="error", data={"message": "No active device"}), ws
         )
+
+async def handle_kill(manager: ConnectionManager, ws, state: StateManager, data: dict):
+    await manager.send_event(
+        Event(type="info", data={"message": "Server is shutting down"}), ws
+    )
+    sys.exit(0)
+
+async def handle_scan_devices(manager: ConnectionManager, ws, state: StateManager, data: dict):
+    devices = list(discover() or [])
+    state.devices = devices
 
 async def dispatch_action(
     action_type: str,
@@ -104,6 +113,10 @@ async def dispatch_action(
             await handle_volume(manager, ws, state, data)
         case "playback-toggle":
             await handle_playback_toggle(manager, ws, state, data)
+        case "kill":
+            await handle_kill(manager, ws, state, data)
+        case "scan-devices":
+            await handle_scan_devices(manager, ws, state, data)
         case _:
             await manager.send_event(
                 Event(type="error", data={"message": "Unknown action"}), ws

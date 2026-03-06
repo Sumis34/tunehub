@@ -17,10 +17,13 @@ export type PlayerContextValue = {
     favorite_id?: string;
     track_info?: TrackInfo;
   };
+  isConnected: boolean;
   changeActiveDevice: (deviceName: string) => void;
   togglePlaybackState: () => void;
   play: ({ favorite_id }: { favorite_id: string }) => void;
   changeVolume: (volume: number) => void;
+  stopServer: () => void;
+  scanDevices: () => void;
 };
 
 export const PlayerContext = createContext<PlayerContextValue | null>(null);

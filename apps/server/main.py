@@ -88,9 +88,11 @@ async def _subscribe_to_device_events(device) -> None:
                 try:
                     if not state or not manager:
                         return
+                    
+                    logger.info(f"Received rendering event from {device_name}: {event.variables}")
 
-                    if "Volume" in event.variables:
-                        volume = event.variables.get("Volume", {}).get("Master")
+                    if "volume" in event.variables:
+                        volume = event.variables.get("volume", {}).get("Master")
                         if volume is not None:
                             logger.debug(f"Volume event from {device_name}: {volume}")
                             state.volume = int(volume)

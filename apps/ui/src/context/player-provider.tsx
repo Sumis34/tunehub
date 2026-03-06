@@ -32,7 +32,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
 
   const [lastEventTime, setLastEventTime] = useState<Date>(new Date());
 
-  const { sendJsonMessage, lastJsonMessage } = useWebSocket<SocketEvent>(
+  const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket<SocketEvent>(
     SOCKET_URL,
     {
       share: true,
@@ -91,6 +91,20 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
     [sendJsonMessage]
   );
 
+  const stopServer = useCallback(() => {
+    sendJsonMessage({
+      type: "kill",
+      data: {},
+    });
+  }, [sendJsonMessage]);
+
+  const scanDevices = useCallback(() => {
+    sendJsonMessage({
+      type: "scan-devices",
+      data: {},
+    });
+  }, [sendJsonMessage]);
+
   const togglePlaybackState = useCallback(() => {
     const newState = !playbackState.isPlaying;
     setPlaybackState({ isPlaying: newState });
@@ -125,6 +139,8 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
     [setVolume, syncVolumeChange]
   );
 
+  const isConnected = readyState === WebSocket.OPEN;
+
   return (
     <PlayerContext.Provider
       value={{
@@ -139,6 +155,9 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
         changeVolume,
         togglePlaybackState,
         play,
+        stopServer,
+        scanDevices,
+        isConnected,
       }}
     >
       {children}

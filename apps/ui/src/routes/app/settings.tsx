@@ -1,75 +1,57 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Speaker, Wifi } from "lucide-react";
-import { Tabs } from "@base-ui-components/react/tabs";
-import AudioBars from "../../components/AudioBars";
 import { usePlayer } from "../../hooks/use-player";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/app/settings")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { activeDevice, changeActiveDevice, playbackState, devices } = usePlayer();
+  const { stopServer, lastEventTime, isConnected } = usePlayer();
+
+  const [time, setTime] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTime(new Date().getTime());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [lastEventTime]);
 
   return (
-    <div className="h-full w-full flex flex-col bg-neutral-900">
-      <Tabs.Root
-        className="flex gap-2 grow"
-        defaultValue="speaker"
-        orientation="vertical"
-      >
-        <Tabs.List className="relative z-0 flex flex-col gap-2">
-          <Tabs.Tab className="p-3 group" value="speaker">
-            <Speaker className="text-neutral-500 w-12 h-12 group-data-selected:stroke-blue-400 transition-all duration-200 ease-in-out" />
-          </Tabs.Tab>
-          <Tabs.Tab className="p-3 group" value="connections">
-            <Wifi className="text-neutral-500 w-12 h-12 group-data-selected:stroke-blue-400 transition-all duration-200 ease-in-out" />
-          </Tabs.Tab>
-          <Tabs.Indicator className="absolute left-0 z-[-1] h-(--active-tab-height) w-1 translate-y-(--active-tab-top) rounded-r-sm bg-blue-400 transition-all duration-200 ease-in-out" />
-        </Tabs.List>
-        <div className="bg-neutral-900 grow p-5 overflow-y-auto">
-          <Tabs.Panel className="text-neutral-100" value="speaker">
-            <h1 className="text-2xl font-bold">Speaker</h1>
-            <div className="w-full flex bg-neutral-800 rounded-md mt-5 p-5 gap-3 items-center">
-              {activeDevice ? (
-                <>
-                  <AudioBars playing={!playbackState.isPlaying} />
-                  <p className="text-2xl font-semibold text-blue-400">
-                    {activeDevice.device_name}
-                  </p>
-                </>
-              ) : (
-                <>
-                  <div>No playback device selected</div>
-                </>
-              )}
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold mt-5 mb-2">
-                Available Devices
-              </h2>
-              <div className="flex flex-col gap-3">
-                {devices
-                  .filter((d) => d !== activeDevice?.device_name)
-                  .map((d) => (
-                    <button
-                      key={d}
-                      onClick={() => changeActiveDevice(d)}
-                      className={`w-full text-left px-4 py-3 rounded-md font-medium bg-neutral-800 text-white flex gap-1 items-center fade`}
-                    >
-                      <Speaker className="w-6 h-6 mr-2" />
-                      {d}
-                    </button>
-                  ))}
-                {devices.length === 0 && <div>No devices found</div>}
-              </div>
-            </div>
-          </Tabs.Panel>
-          <Tabs.Panel className="text-white" value="connections">
-            <h1 className="text-2xl font-bold">Connections</h1>
-          </Tabs.Panel>
-        </div>
-      </Tabs.Root>
+    <div className="grid grid-cols-2 flex-1 text-neutral-100 p-5 gap-5">
+      <div>
+        <h1 className="text-3xl font-bold">Configuration</h1>
+        <p className="text-xl text-neutral-400">
+          Configure your TuneHub experience.
+        </p>
+      </div>
+      <ul className="divide-neutral-800 gap-3 flex flex-col">
+        <button
+          onClick={() => {
+            stopServer();
+          }}
+          className="py-4 px-6 flex items-center gap-1 bg-neutral-900 active:bg-neutral-800 text-neutral-100 text-2xl transition-all w-full text-left rounded-2xl"
+        >
+          Stop Server
+        </button>
+        <button
+          onClick={() => {
+            window.location.reload();
+          }}
+          className="py-4 px-6 flex items-center gap-1 bg-neutral-900 active:bg-neutral-800 text-neutral-100 text-2xl transition-all w-full text-left rounded-2xl"
+        >
+          Restart Client
+        </button>
+        <p className="text-xl text-neutral-400">
+          Last event received{" "}
+          {Math.floor((time - lastEventTime.getTime()) / 1000)}s ago
+        </p>
+        <p className="text-xl text-neutral-400">
+          {isConnected ? "Connected to server" : "Not connected to server"}
+        </p>
+      </ul>
     </div>
   );
 }

@@ -10,7 +10,7 @@ import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Button from "../ui/button";
 import { useNavigate } from "@tanstack/react-router";
-import { MoonStar, Speaker, Volume2 } from "lucide-react";
+import { MoonStar, Speaker, Volume2, Sliders } from "lucide-react";
 import TouchSlider from "./slider";
 import { usePlayer } from "../hooks/use-player";
 
@@ -69,7 +69,7 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
     const draggingChild = ref.current.querySelector("[data-dragging='true']");
     return !draggingChild;
   };
-
+  
   return (
     <div className="relative">
       {createPortal(
@@ -114,7 +114,7 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
               }}
               className="bg-neutral-950 h-full flex flex-col items-center rounded-b-xl"
             >
-              <div className="flex-1 grid grid-rows-2 grid-cols-2 p-4 gap-4 w-full container mx-auto max-w-sm">
+              <div className="flex-1 grid grid-rows-2 grid-cols-3 p-4 gap-4 w-full container mx-auto max-w-sm">
                 <Button
                   onClick={() => {
                     navigate({ to: "/app/select-device" });
@@ -131,7 +131,15 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
                 >
                   <MoonStar className="h-12 w-12 m-auto" />
                 </Button>
-                <div className="col-span-2 flex flex-col gap-4">
+                <Button
+                  onClick={() => {
+                    navigate({ to: "/app/settings" });
+                    close();
+                  }}
+                >
+                  <Sliders className="h-12 w-12 m-auto" />
+                </Button>
+                <div className="col-span-3 flex flex-col gap-4">
                   <TouchSlider
                     value={volume}
                     onValueChange={(val) => changeVolume(val)}
