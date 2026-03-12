@@ -12,6 +12,7 @@ from state import StateManager
 from connection import ConnectionManager, Action
 from handlers import dispatch_action
 from connection import Event
+from dial import Dial
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -175,7 +176,6 @@ async def _subscribe_to_device_events(device) -> None:
             else:
                 logger.error(f"Failed to subscribe to {device_name} after {MAX_SUBSCRIPTION_RETRIES} attempts")
 
-
 async def _unsubscribe_from_all_devices(stop_listener: bool = True) -> None:
     """Unsubscribe from all device events and optionally stop event listener"""
     async with subscriptions_lock:
@@ -207,7 +207,7 @@ async def _unsubscribe_from_all_devices(stop_listener: bool = True) -> None:
             timeout=3.0
         )
     except (asyncio.TimeoutError, Exception):
-        pass  # Suppress all exceptions during shutdown
+        pass  # Suppress all exceptions during shutdown 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -217,6 +217,7 @@ async def lifespan(app: FastAPI):
     logger.info("Starting TuneHub server...")
     manager = ConnectionManager()
     state = StateManager(manager)
+    dial = Dial(bus_num=23, address=0x12)
     
     # Discover devices and subscribe to events
     try:
@@ -227,6 +228,10 @@ async def lifespan(app: FastAPI):
         logger.info(f"Discovered {len(devices)} device(s)")
     except Exception as e:
         logger.error(f"Error during startup: {e}")
+
+    dial.register_callback(lambda delta: state.active_device.set_relative_volume(delta) if state.active_device else None)
+
+    asyncio.create_task(dial.start())
     
     yield
     
