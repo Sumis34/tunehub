@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ColorThief from "colorthief";
 import { LucidePause, LucidePlay } from "lucide-react";
 import { usePlayer } from "../../hooks/use-player";
 import NoDeviceSelected from "../../context/no-deivce-selected";
+import { useQuickMenu } from "../../hooks/use-quick-menu";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
@@ -23,10 +24,23 @@ function RouteComponent() {
     playbackState,
     togglePlaybackState,
     activeDevice,
+    volume,
   } = usePlayer();
 
   const imgRef = useRef<HTMLImageElement>(null);
+  const prevVolume = useRef(volume);
   const coverArt = `${API_BASE}/proxy?url=${encodeURIComponent(currentTrack.track_info?.album_art || "")}`;
+
+  const menu = useQuickMenu();
+
+  useEffect(() => {
+    if (volume !== prevVolume.current) {
+      menu.open();
+      menu.clearInteraction();
+      menu.closeAfter(2000);
+    }
+    prevVolume.current = volume;
+  }, [volume, menu]);
 
   const extractColor = () => {
     if (!imgRef.current) return;

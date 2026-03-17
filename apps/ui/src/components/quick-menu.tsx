@@ -3,22 +3,23 @@ import {
   useMotionValue,
   motion,
   type PanInfo,
-  useMotionValueEvent,
   useTransform,
 } from "framer-motion";
-import { useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Button from "../ui/button";
 import { useNavigate } from "@tanstack/react-router";
 import { MoonStar, Speaker, Volume2, Sliders } from "lucide-react";
 import TouchSlider from "./slider";
 import { usePlayer } from "../hooks/use-player";
+import { useQuickMenu } from "../hooks/use-quick-menu";
+
+const OPEN_HEIGHT = 0.4;
+const HANDLE_HEIGHT = 44;
+const SNAP_THRESHOLD = 0.1;
+const SPRING = { type: "spring" as const, stiffness: 600, damping: 50 };
 
 export default function QuickMenu({ children }: { children: React.ReactNode }) {
-  const OPEN_HEIGHT = 0.4;
-  const HANDLE_HEIGHT = 44;
-  const SNAP_THRESHOLD = 0.1;
-
   const h = window.innerHeight;
   const closed = -h;
   const open = -h * OPEN_HEIGHT;
@@ -30,38 +31,48 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const { changeVolume, volume } = usePlayer();
 
-  const [isOpen, setIsOpen] = useState(false);
+  const {
+    isOpen,
+    open: openMenu,
+    close: closeMenu,
+    markInteraction,
+  } = useQuickMenu();
 
-  useMotionValueEvent(y, "change", (latest) => {
-    setIsOpen(latest > closed + 1);
-  });
+  useEffect(() => {
+    animate(y, isOpen ? open : closed, SPRING);
+  }, [isOpen, y, open, closed]);
 
   const handleDragEnd = (
     _event: MouseEvent | TouchEvent | PointerEvent,
     info: PanInfo
   ) => {
+    markInteraction();
+
     const threshold = h * SNAP_THRESHOLD;
     const isDraggingUp = info.offset.y < 0;
 
-    let target = closed;
+    let shouldOpen = false;
 
     if (isDraggingUp && y.get() > open - threshold) {
-      target = open;
+      shouldOpen = true;
     } else if (!isDraggingUp && y.get() < closed + threshold) {
-      target = closed;
+      shouldOpen = false;
     } else if (!isDraggingUp) {
-      target = open;
+      shouldOpen = true;
     }
 
-    animate(y, target, { type: "spring", stiffness: 600, damping: 50 });
-  };
+    // When nothing changes, manually animate to old pos. because useEffect doesn't run when isOpen doesn't change
+    if (shouldOpen === isOpen) {
+      animate(y, shouldOpen ? open : closed, SPRING);
+      return;
+    }
 
-  const close = () => {
-    animate(y, closed, { type: "spring", stiffness: 600, damping: 50 });
-  };
-
-  const openMenu = () => {
-    animate(y, open, { type: "spring", stiffness: 600, damping: 50 });
+    // Update state to trigger useEffect which animates to new pos.
+    if (shouldOpen) {
+      openMenu();
+    } else {
+      closeMenu();
+    }
   };
 
   const shouldDrag = () => {
@@ -69,23 +80,15 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
     const draggingChild = ref.current.querySelector("[data-dragging='true']");
     return !draggingChild;
   };
-  
+
   return (
     <div className="relative">
       {createPortal(
         <>
           {isOpen && (
             <motion.div
-              onClick={() => {
-                animate(y, closed, {
-                  type: "spring",
-                  stiffness: 600,
-                  damping: 50,
-                });
-              }}
-              style={{
-                opacity,
-              }}
+              onClick={closeMenu}
+              style={{ opacity }}
               className="fixed inset-0 bg-black"
             />
           )}
@@ -100,25 +103,23 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
             dragElastic={0}
             onDragEnd={handleDragEnd}
             className="fixed inset-0 z-10"
+            onMouseDown={markInteraction}
             onClick={() => {
-              if (isOpen) {
-                return;
+              if (!isOpen) {
+                openMenu();
               }
-              openMenu();
             }}
             ref={ref}
           >
             <div
-              style={{
-                paddingTop,
-              }}
+              style={{ paddingTop }}
               className="bg-neutral-950 h-full flex flex-col items-center rounded-b-xl"
             >
               <div className="flex-1 grid grid-rows-2 grid-cols-3 p-4 gap-4 w-full container mx-auto max-w-sm">
                 <Button
                   onClick={() => {
                     navigate({ to: "/app/select-device" });
-                    close();
+                    closeMenu();
                   }}
                 >
                   <Speaker className="h-12 w-12 m-auto" />
@@ -126,7 +127,7 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
                 <Button
                   onClick={() => {
                     navigate({ to: "/screen-saver" });
-                    close();
+                    closeMenu();
                   }}
                 >
                   <MoonStar className="h-12 w-12 m-auto" />
@@ -134,7 +135,7 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
                 <Button
                   onClick={() => {
                     navigate({ to: "/app/settings" });
-                    close();
+                    closeMenu();
                   }}
                 >
                   <Sliders className="h-12 w-12 m-auto" />
@@ -145,9 +146,6 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
                     onValueChange={(val) => changeVolume(val)}
                     icon={<Volume2 className="h-6 w-6 stroke-neutral-800" />}
                   />
-                  {/* <TouchSlider
-                    icon={<SunDim className="h-6 w-6 stroke-neutral-800" />}
-                  /> */}
                 </div>
               </div>
               <div className="p-4">
