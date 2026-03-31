@@ -112,3 +112,10 @@ It's the simplest if you run the server and UI on your local machine and just co
 # On the target device (e.g. Raspberry Pi)
 DISPLAY=:0 nohup chromium http://YOUR_LOCAL_IP:5173 --kiosk --start-fullscreen -disable-pinch --incognito
 ```
+
+### Release a new version
+
+1. Checkout the `main` branch and make sure all your changes are merged there.
+2. Run `git tag vX.Y.Z` to create a new tag for the release.
+3. Push the tag to GitHub with `git push origin vX.Y.Z`.
+4. Pipeline will run and create a new release with all the necessary files.
