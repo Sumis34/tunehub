@@ -36,7 +36,8 @@ jobs:
 
       - name: Create zip archive
         run: |
-          zip -r ./tunehub-${{ github.ref_name }}.zip dist
+          cd dist
+          zip -r ../tunehub-${{ github.ref_name }}.zip .
 
       - name: Create GitHub Release and upload asset
         uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
