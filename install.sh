@@ -13,8 +13,8 @@ sudo chown -R "$USER_NAME":"$USER_NAME" "$APP_DIR"
 
 echo "[*] Moving source files to $APP_DIR..."
 
-mkdir -p "/etc$APP_DIR"
-mv config.toml "/etc$APP_DIR/config.toml"
+sudo mkdir -p "/etc$APP_DIR"
+sudo mv config.toml "/etc$APP_DIR/config.toml"
 
 shopt -s dotglob nullglob
 for item in *; do
