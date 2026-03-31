@@ -70,6 +70,13 @@ if [ -z "$DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
 fi
 ```
 
+1. Add Software I2C bus and enable I2C on the Raspberry Pi:
+
+```bash
+# Append to /boot/firmware/config.txt:
+dtoverlay=i2c-gpio,bus=3,sda=19,scl=26
+```
+
 ### Tunhub Installation
 
 1. Remove any existing `tunehub` directory and uninstall previous versions:
