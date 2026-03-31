@@ -14,6 +14,8 @@ INCLUDE_FILES = [
     "sonos.py",
     "state.py",
     "dial.py",
+    "config.py",
+    "config.toml",
 ]
 
 # Directories you actually have — adjust this for YOUR repo

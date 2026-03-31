@@ -1,11 +1,16 @@
 import asyncio
-from smbus2 import SMBus
 import struct
-
+try: 
+    from smbus2 import SMBus
+except ImportError:
+    SMBus = None
 class Dial:
     """Reads relative rotary movement over I2C and allows registering callbacks for new deltas."""
 
     def __init__(self, bus_num: int, address: int, poll_interval: float = 0.05):
+        if SMBus is None:
+            raise ImportError("Failed to import smbus2. (Windows has no support for smbus2)")
+
         self.bus_num = bus_num
         self.address = address
         self.poll_interval = poll_interval

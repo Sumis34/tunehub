@@ -13,6 +13,7 @@ from connection import ConnectionManager, Action
 from handlers import dispatch_action
 from connection import Event
 from dial import Dial
+from config import Config
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -217,8 +218,15 @@ async def lifespan(app: FastAPI):
     logger.info("Starting TuneHub server...")
     manager = ConnectionManager()
     state = StateManager(manager)
-    dial = Dial(bus_num=23, address=0x12)
-    
+    dial: Dial = None
+    config = Config()
+
+    try:
+        dial =Dial(bus_num=config.dial_i2c_bus, address=config.dial_i2c_address) 
+    except Exception as e:
+        logger.error(f"Failed to initialize dial: {e}")
+        dial = None
+
     # Discover devices and subscribe to events
     try:
         devices = await _discover_devices_async()
@@ -229,9 +237,11 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"Error during startup: {e}")
 
-    dial.register_callback(lambda delta: state.active_device.set_relative_volume(delta) if state.active_device else None)
 
-    asyncio.create_task(dial.start())
+    if dial:
+        logger.info(f"Using address {hex(config.dial_i2c_address)} on bus {config.dial_i2c_bus} for volume dial")
+        dial.register_callback(lambda delta: state.active_device.set_relative_volume(delta) if state.active_device else None)
+        asyncio.create_task(dial.start())
     
     yield
     
