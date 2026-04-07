@@ -98,6 +98,22 @@ async def handle_scan_devices(manager: ConnectionManager, ws, state: StateManage
     devices = list(discover() or [])
     state.devices = devices
 
+async def handle_skip_forward(manager: ConnectionManager, ws, state: StateManager, data: dict):
+    if state.active_device:
+        state.active_device.next()
+    else:
+        await manager.send_event(
+            Event(type="error", data={"message": "No active device"}), ws
+        )
+
+async def handle_skip_backward(manager: ConnectionManager, ws, state: StateManager, data: dict):
+    if state.active_device:
+        state.active_device.previous()
+    else:
+        await manager.send_event(
+            Event(type="error", data={"message": "No active device"}), ws
+        )
+
 async def dispatch_action(
     action_type: str,
     manager: ConnectionManager,
@@ -119,6 +135,10 @@ async def dispatch_action(
             await handle_kill(manager, ws, state, data)
         case "scan-devices":
             await handle_scan_devices(manager, ws, state, data)
+        case "skip-forward":
+            await handle_skip_forward(manager, ws, state, data)
+        case "skip-backward":
+            await handle_skip_backward(manager, ws, state, data)
         case _:
             await manager.send_event(
                 Event(type="error", data={"message": "Unknown action"}), ws

@@ -7,7 +7,7 @@ import httpx
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse, Response
-from sonos import get_playable_favorites
+from sonos import parse_transport_actions
 from state import StateManager
 from connection import ConnectionManager, Action
 from handlers import dispatch_action
@@ -116,14 +116,17 @@ async def _subscribe_to_device_events(device) -> None:
                     enqueued_metadata = event.variables.get("enqueued_transport_uri_meta_data")
                     transport_state = event.variables.get("transport_state")
                     
+                    current_transport_actions = event.variables.get("current_transport_actions")
+                    
                     # Attempt to find a default album art from the current track from favorites. Implemented for tunehub native sources
                     try:
                         resource = metadata.resources[0]
                         uri = resource.uri
                         album_art = next((favorite for favorite in state.favorites if favorite.get("uri") == uri), None).get("album_art")
                     except Exception as e:
-                        logger.info(f"Failed to find album art for URI: {uri}")
-                        logger.error(f"Error: {e}")
+                        logger.debug(f"Failed to find album art for URI: {uri}")
+                        logger.debug(f"Error: {e}")
+                        pass
 
                     if metadata and hasattr(metadata, "title") and hasattr(metadata, "creator"):
                         title = metadata.title
@@ -161,6 +164,11 @@ async def _subscribe_to_device_events(device) -> None:
                         "artist": artist,
                         "album_art": album_art,
                     }
+                    
+                    if current_transport_actions:
+                        track_info["actions"] = parse_transport_actions(current_transport_actions)
+                    else:
+                        track_info["actions"] = state.track_info.get("actions")
 
                     state.track_info = track_info
                     state.playback_state = transport_state

@@ -16,6 +16,25 @@ class Favorite(TypedDict):
   album_art: Optional[str]
   uri: Optional[str]
 
+def parse_transport_actions(actions_str: str):
+
+  # Set, Stop, Pause, Play, X_DLNA_SeekTime, Next, Previous, X_DLNA_SeekTra
+  actions = {
+    "play": False,
+    "pause": False,
+    "stop": False,
+    "next": False,
+    "previous": False,
+  }
+  
+  if not actions_str:
+    return actions
+    
+  for action in actions_str.split(","):
+    actions[action.strip().lower()] = True
+    
+  return actions
+
 def extract_uri_from_item(item):
     """
     Try several ways to get a playable URI from a favorite item returned by SoCo.

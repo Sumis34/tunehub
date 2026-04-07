@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import ColorThief from "colorthief";
-import { LucidePause, LucidePlay } from "lucide-react";
+import { LucidePause, LucidePlay, LucideSkipForward } from "lucide-react";
 import { usePlayer } from "../../hooks/use-player";
 import NoDeviceSelected from "../../context/no-deivce-selected";
 import { useQuickMenu } from "../../hooks/use-quick-menu";
@@ -25,6 +25,8 @@ function RouteComponent() {
     togglePlaybackState,
     activeDevice,
     volume,
+    skipBackward,
+    skipForward,
   } = usePlayer();
 
   const imgRef = useRef<HTMLImageElement>(null);
@@ -79,6 +81,8 @@ function RouteComponent() {
     return <NoDeviceSelected />;
   }
 
+  console.log(currentTrack);
+
   return (
     <div className="flex-1 min-h-0 p-1 flex flex-col">
       <div className="grid grid-rows-1 grid-cols-3 flex-1 grow gap-1 min-h-0">
@@ -127,17 +131,34 @@ function RouteComponent() {
           <h1 className="text-3xl text-neutral-100 truncate">{title}</h1>
           <h2 className="text-2xl text-neutral-500">{artist}</h2>
         </div>
-        <div className="col-span-1 flex items-center justify-start">
-          <button
-            onClick={() => togglePlaybackState()}
-            className="bg-neutral-100 rounded-full p-3 active:scale-95 transition-transform"
-          >
-            {playbackState && playbackState.isPlaying ? (
-              <LucidePause className="fill-neutral-900 size-8" />
-            ) : (
-              <LucidePlay className="fill-neutral-900 size-8" />
-            )}
-          </button>
+        <div className="col-span-1 flex items-center justify-around">
+          <div className="flex gap-3">
+            <button
+              onClick={() => skipBackward()}
+              disabled={currentTrack.track_info?.actions?.previous === false}
+              className="disabled:opacity-0"
+            >
+              <LucideSkipForward className="fill-neutral-500 stroke-neutral-500 size-6 rotate-180" />
+            </button>
+            <button
+              onClick={() => togglePlaybackState()}
+              className="bg-neutral-100 rounded-full p-3 active:scale-95 transition-transform"
+              disabled={currentTrack.track_info?.actions?.play}
+            >
+              {playbackState && playbackState.isPlaying ? (
+                <LucidePause className="fill-neutral-900 size-8" />
+              ) : (
+                <LucidePlay className="fill-neutral-900 size-8" />
+              )}
+            </button>
+            <button
+              onClick={() => skipForward()}
+              disabled={currentTrack.track_info?.actions?.next === false}
+              className="disabled:opacity-0"
+            >
+              <LucideSkipForward className="fill-neutral-500 stroke-neutral-500 size-6" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
