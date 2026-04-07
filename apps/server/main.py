@@ -152,6 +152,9 @@ async def _subscribe_to_device_events(device) -> None:
                                 )
                             except Exception as e:
                                 logger.debug(f"Failed to build album art URI for radio: {e}")
+                                
+                    if title == "ZPSTR_BUFFERING":
+                        title = None
 
                     track_info = {
                         "title": title,

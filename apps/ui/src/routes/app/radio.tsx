@@ -63,8 +63,17 @@ function RouteComponent() {
   const shadow = `0px 0px 50px 10px rgba(${dominantColorValues?.slice(0, 3).join(",")},0.5)`;
   const bgColor = `rgba(${dominantColorValues?.join(",")})`;
 
-  const title = currentTrack.track_info?.title ?? "Unknown Track";
-  const artist = currentTrack.track_info?.artist ?? "Unknown Artist";
+  const title =
+    currentTrack.track_info?.title &&
+    currentTrack.track_info.title.trim() !== ""
+      ? currentTrack.track_info.title
+      : "Unknown Track";
+
+  const artist =
+    currentTrack.track_info?.artist &&
+    currentTrack.track_info.artist.trim() !== ""
+      ? currentTrack.track_info.artist
+      : "Unknown Artist";
 
   if (!activeDevice?.device_name) {
     return <NoDeviceSelected />;
