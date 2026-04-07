@@ -14,7 +14,7 @@ from handlers import dispatch_action
 from connection import Event
 from dial import Dial
 from config import Config
-from sources import get_tunehub_sources
+from sources import Sources
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -291,11 +291,8 @@ async def websocket_endpoint(ws: WebSocket):
     logger.info(f"Client connected. Active connections: {len(manager.active_connections)}")
 
     if state.active_device:
-        favorites = []
-        favorites.extend(get_playable_favorites(state.active_device))
-        favorites.extend(get_tunehub_sources())
-         
-        state.favorites = favorites
+        sources = Sources(state.active_device)
+        state.favorites = sources.get_sources()
         
         state.playback_state = state.active_device.get_current_transport_info().get("current_transport_state")
         await _subscribe_to_device_events(state.active_device)

@@ -4,7 +4,7 @@ from state import StateManager
 from connection import ConnectionManager, Event
 from sonos import play_favorite, get_playable_favorites, discover
 import sys
-from sources import get_tunehub_sources
+from sources import Sources
 
 logger = logging.getLogger(__name__)
 
@@ -20,10 +20,8 @@ async def handle_active_device(manager: ConnectionManager, ws, state: StateManag
 
         # Update favorites for the new active device
         try:
-            favorites = []
-            favorites.extend(get_playable_favorites(state.active_device))
-            favorites.extend(get_tunehub_sources())
-            state.favorites = favorites
+            sources = Sources(state.active_device)
+            state.favorites = sources.get_sources()
         except Exception as e:
             logger.error(f"Failed to get favorites for {device_name}: {e}")
 
