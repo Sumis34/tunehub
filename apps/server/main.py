@@ -14,6 +14,7 @@ from handlers import dispatch_action
 from connection import Event
 from dial import Dial
 from config import Config
+from sources import get_tunehub_sources
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -114,6 +115,15 @@ async def _subscribe_to_device_events(device) -> None:
                     metadata = event.variables.get("current_track_meta_data")
                     enqueued_metadata = event.variables.get("enqueued_transport_uri_meta_data")
                     transport_state = event.variables.get("transport_state")
+                    
+                    # Attempt to find a default album art from the current track from favorites. Implemented for tunehub native sources
+                    try:
+                        resource = metadata.resources[0]
+                        uri = resource.uri
+                        album_art = next((favorite for favorite in state.favorites if favorite.get("uri") == uri), None).get("album_art")
+                    except Exception as e:
+                        logger.info(f"Failed to find album art for URI: {uri}")
+                        logger.error(f"Error: {e}")
 
                     if metadata and hasattr(metadata, "title") and hasattr(metadata, "creator"):
                         title = metadata.title
@@ -222,7 +232,7 @@ async def lifespan(app: FastAPI):
     config = Config()
 
     try:
-        dial =Dial(bus_num=config.dial_i2c_bus, address=config.dial_i2c_address) 
+        dial = Dial(bus_num=config.dial_i2c_bus, address=config.dial_i2c_address) 
     except Exception as e:
         logger.error(f"Failed to initialize dial: {e}")
         dial = None
@@ -278,8 +288,13 @@ async def websocket_endpoint(ws: WebSocket):
     logger.info(f"Client connected. Active connections: {len(manager.active_connections)}")
 
     if state.active_device:
-        state.favorites = get_playable_favorites(state.active_device)
-        state.playback_state = state.active_device.get_current_transport_info().get("current_transport_state") 
+        favorites = []
+        favorites.extend(get_playable_favorites(state.active_device))
+        favorites.extend(get_tunehub_sources())
+         
+        state.favorites = favorites
+        
+        state.playback_state = state.active_device.get_current_transport_info().get("current_transport_state")
         await _subscribe_to_device_events(state.active_device)
 
     try:

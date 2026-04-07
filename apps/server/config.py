@@ -1,5 +1,7 @@
 import tomllib
 import logging
+from sonos import Favorite
+from typing import List
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -11,6 +13,7 @@ class Config:
     
     self.dial_i2c_address = data.get("dial", {}).get("i2c_address")
     self.dial_i2c_bus = data.get("dial", {}).get("i2c_bus")
+    self.native_sources: List[Favorite] = data.get("sources", {}).get("native", [])
   
   def load(self):
     for path in self.paths:

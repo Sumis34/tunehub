@@ -16,6 +16,7 @@ INCLUDE_FILES = [
     "dial.py",
     "config.py",
     "config.toml",
+    "sources.py",
 ]
 
 # Directories you actually have — adjust this for YOUR repo
