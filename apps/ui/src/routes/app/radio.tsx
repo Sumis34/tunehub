@@ -141,7 +141,7 @@ function RouteComponent() {
             <button
               onClick={() => togglePlaybackState()}
               className="bg-neutral-100 rounded-full p-3 active:scale-95 transition-transform"
-              disabled={currentTrack.track_info?.actions?.play}
+              disabled={currentTrack.track_info?.actions?.play === false}
             >
               {playbackState && playbackState.isPlaying ? (
                 <LucidePause className="fill-neutral-900 size-8" />
