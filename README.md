@@ -74,17 +74,11 @@ fi
 
 ```bash
 # Append to /boot/firmware/config.txt:
-dtoverlay=i2c-gpio,bus=3,sda=19,scl=26
+# Use free GPIO pins, this may vary based on your setup.
+dtoverlay=i2c-gpio,i2c_gpio_sda=19,i2c_gpio_scl=26,bus=4
 ```
 
 ### Tunhub Installation
-
-1. Remove any existing `tunehub` directory and uninstall previous versions:
-
-```bash
-# On your Raspberry Pi
-cd tunehub && sudo ./uninstall.sh
-```
 
 1. Start the installation script:
 
