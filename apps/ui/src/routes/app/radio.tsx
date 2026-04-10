@@ -5,6 +5,7 @@ import { LucidePause, LucidePlay, LucideSkipForward } from "lucide-react";
 import { usePlayer } from "../../hooks/use-player";
 import NoDeviceSelected from "../../context/no-deivce-selected";
 import { useQuickMenu } from "../../hooks/use-quick-menu";
+import { Carousel } from "../../components/carousel";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
@@ -81,30 +82,57 @@ function RouteComponent() {
     return <NoDeviceSelected />;
   }
 
+  const items = [
+    <div
+      key="cover-art"
+      className="w-full h-full flex items-center justify-center transition-colors relative rounded-lg"
+      style={{
+        background: dominantColorValues ? bgColor : "transparent",
+      }}
+    >
+      <img
+        ref={imgRef}
+        src={coverArt}
+        // src="https://marketplace.canva.com/EAGl2RBdUF0/1/0/1600w/canva-dark-blue-and-white-modern-lost-in-stars-album-cover-LkSUXx1d-Sw.jpg"
+        // src="https://cms-assets.tutsplus.com/cdn-cgi/image/width=360/uploads/users/114/posts/34296/final_image/Final-image.jpg"
+        alt="cover art"
+        className="rounded-md h-72 aspect-square"
+        crossOrigin="anonymous"
+        onLoad={extractColor}
+        onError={() => setDominantColorValues([64, 64, 64])}
+        style={{
+          boxShadow: shadow,
+        }}
+      />
+    </div>,
+    <div
+      key="cover-art"
+      className="w-full h-full flex items-center justify-center transition-colors relative rounded-lg"
+      style={{
+        background: dominantColorValues ? bgColor : "transparent",
+      }}
+    >
+      <img
+        ref={imgRef}
+        src={coverArt}
+        // src="https://marketplace.canva.com/EAGl2RBdUF0/1/0/1600w/canva-dark-blue-and-white-modern-lost-in-stars-album-cover-LkSUXx1d-Sw.jpg"
+        // src="https://cms-assets.tutsplus.com/cdn-cgi/image/width=360/uploads/users/114/posts/34296/final_image/Final-image.jpg"
+        alt="cover art"
+        className="rounded-md h-72 aspect-square"
+        crossOrigin="anonymous"
+        onLoad={extractColor}
+        onError={() => setDominantColorValues([64, 64, 64])}
+        style={{
+          boxShadow: shadow,
+        }}
+      />
+    </div>,
+  ];
+
   return (
     <div className="flex-1 min-h-0 p-1 flex flex-col">
       <div className="grid grid-rows-1 grid-cols-3 flex-1 grow gap-1 min-h-0">
-        <div
-          className="col-span-2 flex items-center justify-center rounded-lg transition-colors"
-          style={{
-            background: dominantColorValues ? bgColor : "transparent",
-          }}
-        >
-          <img
-            ref={imgRef}
-            src={coverArt}
-            // src="https://marketplace.canva.com/EAGl2RBdUF0/1/0/1600w/canva-dark-blue-and-white-modern-lost-in-stars-album-cover-LkSUXx1d-Sw.jpg"
-            // src="https://cms-assets.tutsplus.com/cdn-cgi/image/width=360/uploads/users/114/posts/34296/final_image/Final-image.jpg"
-            alt="cover art"
-            className="rounded-md h-72 aspect-square"
-            crossOrigin="anonymous"
-            onLoad={extractColor}
-            onError={() => setDominantColorValues([64, 64, 64])}
-            style={{
-              boxShadow: shadow,
-            }}
-          />
-        </div>
+        <Carousel className="col-span-2 rounded-lg overflow-hidden relative bg-neutral-900" items={items} />
         <div className="col-span-1 bg-neutral-900 rounded-lg overflow-y-auto mask-exclude masked-overflow no-scrollbar">
           <div className="divide-neutral-800 divide-y">
             {favorites.map(([name, id, desc]) => (
