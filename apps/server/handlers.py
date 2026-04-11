@@ -4,6 +4,7 @@ from state import StateManager
 from connection import ConnectionManager, Event
 from sonos import play_favorite, get_playable_favorites, discover
 import sys
+from sources import Sources
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,8 @@ async def handle_active_device(manager: ConnectionManager, ws, state: StateManag
 
         # Update favorites for the new active device
         try:
-            state.favorites = get_playable_favorites(matching_device)
+            sources = Sources(state.active_device)
+            state.favorites = sources.get_sources()
         except Exception as e:
             logger.error(f"Failed to get favorites for {device_name}: {e}")
 
@@ -96,6 +98,22 @@ async def handle_scan_devices(manager: ConnectionManager, ws, state: StateManage
     devices = list(discover() or [])
     state.devices = devices
 
+async def handle_skip_forward(manager: ConnectionManager, ws, state: StateManager, data: dict):
+    if state.active_device:
+        state.active_device.next()
+    else:
+        await manager.send_event(
+            Event(type="error", data={"message": "No active device"}), ws
+        )
+
+async def handle_skip_backward(manager: ConnectionManager, ws, state: StateManager, data: dict):
+    if state.active_device:
+        state.active_device.previous()
+    else:
+        await manager.send_event(
+            Event(type="error", data={"message": "No active device"}), ws
+        )
+
 async def dispatch_action(
     action_type: str,
     manager: ConnectionManager,
@@ -117,6 +135,10 @@ async def dispatch_action(
             await handle_kill(manager, ws, state, data)
         case "scan-devices":
             await handle_scan_devices(manager, ws, state, data)
+        case "skip-forward":
+            await handle_skip_forward(manager, ws, state, data)
+        case "skip-backward":
+            await handle_skip_backward(manager, ws, state, data)
         case _:
             await manager.send_event(
                 Event(type="error", data={"message": "Unknown action"}), ws

@@ -70,60 +70,23 @@ if [ -z "$DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
 fi
 ```
 
-### Prerequisites
-
-- A Raspberry Pi (preferably Raspberry Pi 4 or newer) with Raspberry Pi OS installed.
-- A touchscreen display connected to the Raspberry Pi.
-- Python installed on the Raspberry Pi.
-- Hardware setup as described in the [Hardware Specific Setup](#hardware-specific-setup) section.
-
-### Steps
-
-1. Clone the repository on your local machine:
+1. Add Software I2C bus and enable I2C on the Raspberry Pi:
 
 ```bash
-git clone https://github.com/sumis34/tunehub.git
+# Append to /boot/firmware/config.txt:
+# Use free GPIO pins, this may vary based on your setup.
+dtoverlay=i2c-gpio,i2c_gpio_sda=19,i2c_gpio_scl=26,bus=4
 ```
 
-1. Navigate to the project directory:
+### Tunhub Installation
+
+1. Start the installation script:
 
 ```bash
-cd tunehub
+curl -fsSL https://raw.githubusercontent.com/Sumis34/tunehub/refs/heads/master/download.sh | bash -s v0.0.4
 ```
 
-1. Build the project:
-
-```bash
-pnpm install
-pnpm run build
-```
-
-1. Remove any existing `tunehub` directory and uninstall previous versions:
-
-```bash
-# On your Raspberry Pi
-cd tunehub && sudo ./uninstall.sh
-```
-
-1. Copy the `dist` directory to your Raspberry Pi:
-
-```bash
-scp -r .\dist\ noe@pi:/home/noe/tunehub
-```
-
-1. SSH into your Raspberry Pi:
-
-```bash
-ssh noe@pi
-```
-
-1. Run the installation script:
-
-```bash
-cd tunehub && dos2unix install.sh && chmod +x install.sh && ./install.sh
-```
-
-1. Verify that the TuneHub service is running:
+1. Verify that the `tunehubd` service is running:
 
 ```bash
 systemctl status tunehubd
@@ -143,3 +106,10 @@ It's the simplest if you run the server and UI on your local machine and just co
 # On the target device (e.g. Raspberry Pi)
 DISPLAY=:0 nohup chromium http://YOUR_LOCAL_IP:5173 --kiosk --start-fullscreen -disable-pinch --incognito
 ```
+
+### Release a new version
+
+1. Checkout the `main` branch and make sure all your changes are merged there.
+2. Run `git tag vX.Y.Z` to create a new tag for the release.
+3. Push the tag to GitHub with `git push origin vX.Y.Z`.
+4. Pipeline will run and create a new release with all the necessary files.

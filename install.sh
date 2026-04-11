@@ -12,6 +12,10 @@ sudo mkdir -p "$APP_DIR"
 sudo chown -R "$USER_NAME":"$USER_NAME" "$APP_DIR"
 
 echo "[*] Moving source files to $APP_DIR..."
+
+sudo mkdir -p "/etc$APP_DIR"
+sudo mv config.toml "/etc$APP_DIR/config.toml"
+
 shopt -s dotglob nullglob
 for item in *; do
     # Skip install script and systemd unit files

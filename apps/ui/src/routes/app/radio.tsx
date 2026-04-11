@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ColorThief from "colorthief";
-import { LucidePause, LucidePlay } from "lucide-react";
+import { LucidePause, LucidePlay, LucideSkipForward } from "lucide-react";
 import { usePlayer } from "../../hooks/use-player";
 import NoDeviceSelected from "../../context/no-deivce-selected";
+import { useQuickMenu } from "../../hooks/use-quick-menu";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
@@ -23,10 +24,25 @@ function RouteComponent() {
     playbackState,
     togglePlaybackState,
     activeDevice,
+    volume,
+    skipBackward,
+    skipForward,
   } = usePlayer();
 
   const imgRef = useRef<HTMLImageElement>(null);
+  const prevVolume = useRef(volume);
   const coverArt = `${API_BASE}/proxy?url=${encodeURIComponent(currentTrack.track_info?.album_art || "")}`;
+
+  const menu = useQuickMenu();
+
+  useEffect(() => {
+    if (volume !== prevVolume.current) {
+      menu.open();
+      menu.clearInteraction();
+      menu.closeAfter(2000);
+    }
+    prevVolume.current = volume;
+  }, [volume, menu]);
 
   const extractColor = () => {
     if (!imgRef.current) return;
@@ -49,8 +65,17 @@ function RouteComponent() {
   const shadow = `0px 0px 50px 10px rgba(${dominantColorValues?.slice(0, 3).join(",")},0.5)`;
   const bgColor = `rgba(${dominantColorValues?.join(",")})`;
 
-  const title = currentTrack.track_info?.title ?? "Unknown Track";
-  const artist = currentTrack.track_info?.artist ?? "Unknown Artist";
+  const title =
+    currentTrack.track_info?.title &&
+    currentTrack.track_info.title.trim() !== ""
+      ? currentTrack.track_info.title
+      : "Unknown Track";
+
+  const artist =
+    currentTrack.track_info?.artist &&
+    currentTrack.track_info.artist.trim() !== ""
+      ? currentTrack.track_info.artist
+      : "Unknown Artist";
 
   if (!activeDevice?.device_name) {
     return <NoDeviceSelected />;
@@ -104,17 +129,34 @@ function RouteComponent() {
           <h1 className="text-3xl text-neutral-100 truncate">{title}</h1>
           <h2 className="text-2xl text-neutral-500">{artist}</h2>
         </div>
-        <div className="col-span-1 flex items-center justify-start">
-          <button
-            onClick={() => togglePlaybackState()}
-            className="bg-neutral-100 rounded-full p-3 active:scale-95 transition-transform"
-          >
-            {playbackState && playbackState.isPlaying ? (
-              <LucidePause className="fill-neutral-900 size-8" />
-            ) : (
-              <LucidePlay className="fill-neutral-900 size-8" />
-            )}
-          </button>
+        <div className="col-span-1 flex items-center justify-around">
+          <div className="flex gap-3">
+            <button
+              onClick={() => skipBackward()}
+              disabled={currentTrack.track_info?.actions?.previous === false}
+              className="disabled:opacity-0"
+            >
+              <LucideSkipForward className="fill-neutral-500 stroke-neutral-500 size-6 rotate-180" />
+            </button>
+            <button
+              onClick={() => togglePlaybackState()}
+              className="bg-neutral-100 rounded-full p-3 active:scale-95 transition-transform"
+              disabled={currentTrack.track_info?.actions?.play === false}
+            >
+              {playbackState && playbackState.isPlaying ? (
+                <LucidePause className="fill-neutral-900 size-8" />
+              ) : (
+                <LucidePlay className="fill-neutral-900 size-8" />
+              )}
+            </button>
+            <button
+              onClick={() => skipForward()}
+              disabled={currentTrack.track_info?.actions?.next === false}
+              className="disabled:opacity-0"
+            >
+              <LucideSkipForward className="fill-neutral-500 stroke-neutral-500 size-6" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

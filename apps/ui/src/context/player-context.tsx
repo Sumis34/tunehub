@@ -4,6 +4,14 @@ export type TrackInfo = {
   title: string | null;
   artist: string | null;
   album_art: string | null;
+  actions?: {
+    play: boolean;
+    pause: boolean;
+    stop: boolean;
+    next: boolean;
+    previous: boolean;
+    set: boolean;
+  };
 };
 
 export type PlayerContextValue = {
@@ -24,6 +32,8 @@ export type PlayerContextValue = {
   changeVolume: (volume: number) => void;
   stopServer: () => void;
   scanDevices: () => void;
+  skipForward: () => void;
+  skipBackward: () => void;
 };
 
 export const PlayerContext = createContext<PlayerContextValue | null>(null);

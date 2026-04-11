@@ -14,6 +14,26 @@ class Favorite(TypedDict):
   id: Optional[str]
   description: str
   album_art: Optional[str]
+  uri: Optional[str]
+
+def parse_transport_actions(actions_str: str):
+
+  # Set, Stop, Pause, Play, X_DLNA_SeekTime, Next, Previous, X_DLNA_SeekTra
+  actions = {
+    "play": False,
+    "pause": False,
+    "stop": False,
+    "next": False,
+    "previous": False,
+  }
+  
+  if not actions_str:
+    return actions
+    
+  for action in actions_str.split(","):
+    actions[action.strip().lower()] = True
+    
+  return actions
 
 def extract_uri_from_item(item):
     """
@@ -84,9 +104,8 @@ def get_playable_favorites(zone: SoCo) -> List[Favorite]:
       "ref": ref,
       "id": id,
       "description": description,
-      "album_art": album_art
-    })
-
+      "album_art": album_art,
+    }) 
   return favorites
 
 def play_favorite(zone: SoCo, favorite: Favorite | list):
@@ -95,10 +114,12 @@ def play_favorite(zone: SoCo, favorite: Favorite | list):
   title = favorite.get("title")
   item_class = favorite.get("item_class") or ""
   ref = favorite.get("ref")
+  uri = favorite.get("uri")
 
   try:
       if is_radio(item_class):
-        uri, _ = extract_uri_from_item(ref)
+        if uri is None and ref is not None:
+          uri, _ = extract_uri_from_item(ref)
         if uri:
           print("  Radio/broadcast detected. Playing via play_uri...")
           zone.play_uri(uri=uri, title=title)

@@ -105,6 +105,20 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
     });
   }, [sendJsonMessage]);
 
+  const skipForward = useCallback(() => {
+    sendJsonMessage({
+      type: "skip-forward",
+      data: {},
+    });
+  }, [sendJsonMessage]);
+
+  const skipBackward = useCallback(() => {
+    sendJsonMessage({
+      type: "skip-backward",
+      data: {},
+    });
+  }, [sendJsonMessage]);
+
   const togglePlaybackState = useCallback(() => {
     const newState = !playbackState.isPlaying;
     setPlaybackState({ isPlaying: newState });
@@ -158,6 +172,8 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
         stopServer,
         scanDevices,
         isConnected,
+        skipForward,
+        skipBackward,
       }}
     >
       {children}

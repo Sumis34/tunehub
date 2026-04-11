@@ -13,6 +13,10 @@ INCLUDE_FILES = [
     "handlers.py",
     "sonos.py",
     "state.py",
+    "dial.py",
+    "config.py",
+    "config.toml",
+    "sources.py",
 ]
 
 # Directories you actually have — adjust this for YOUR repo

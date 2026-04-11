@@ -1,0 +1,50 @@
+title = "Tunehub Static Configuration"
+
+[dial]
+i2c_address = 0x12
+i2c_bus = 22
+
+[[sources.native]]
+title = "SRF 1"
+item_class = "audioBroadcast"
+# ref = None
+id = "custom-srf1"
+description = "Tunehub - Region Bern Freiburg Wallis"
+album_art = "https://www.srf.ch/staticfiles/aron/assets/radio-srf-1-square-BRF5hy-0.svg"
+uri = "aac://livestreaming-node-4.srg-ssr.ch/srgssr/regi_be_fr_vs/aac/96"
+
+[[sources.native]]
+title = "SRF 2"
+item_class = "audioBroadcast"
+# ref = None
+id = "custom-srf2"
+description = "Tunehub - Kultur"
+album_art = "https://www.srf.ch/staticfiles/aron/assets/radio-srf-2-square-BnG0DiSc.svg"
+uri = "aac://livestreaming-node-1.srg-ssr.ch/srgssr/srf2/aac/96"
+
+[[sources.native]]
+title = "SRF 3"
+item_class = "audioBroadcast"
+# ref = None
+id = "custom-srf3"
+description = "Tunehub - Rock, Pop, Unterhaltung"
+album_art = "https://www.srf.ch/staticfiles/aron/assets/radio-srf-3-square-Ds8liY9N.svg"
+uri = "aac://livestreaming-node-3.srg-ssr.ch/srgssr/srf3/aac/96"
+
+# [[sources.native]]
+# title = "SRF 4 News"
+# item_class = "audioBroadcast"
+# # ref = None
+# id = "custom-srf4"
+# description = "Tunehub - Aktuelle Nachrichten, Hintergrundberichte, Interviews und Reportagen"
+# album_art = "https://www.srf.ch/staticfiles/aron/assets/radio-srf-4-square-CPpwSzVl.svg"
+# uri = "aac://livestreaming-node-1.srg-ssr.ch/srgssr/srf4news/aac/96"
+
+[[sources.native]]
+title = "SRF Musikwelle"
+item_class = "audioBroadcast"
+# ref = None
+id = "custom-srfmw"
+description = "Tunehub - Volksmusik"
+album_art = "https://www.srf.ch/staticfiles/aron/assets/radio-srf-musikwelle-square-BoII6AQN.svg"
+uri = "aac://livestreaming-node-4.srg-ssr.ch/srgssr/srfmw/aac/96"

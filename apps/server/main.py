@@ -7,11 +7,14 @@ import httpx
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse, Response
-from sonos import get_playable_favorites
+from sonos import parse_transport_actions
 from state import StateManager
 from connection import ConnectionManager, Action
 from handlers import dispatch_action
 from connection import Event
+from dial import Dial
+from config import Config
+from sources import Sources
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -112,6 +115,18 @@ async def _subscribe_to_device_events(device) -> None:
                     metadata = event.variables.get("current_track_meta_data")
                     enqueued_metadata = event.variables.get("enqueued_transport_uri_meta_data")
                     transport_state = event.variables.get("transport_state")
+                    
+                    current_transport_actions = event.variables.get("current_transport_actions")
+                    
+                    # Attempt to find a default album art from the current track from favorites. Implemented for tunehub native sources
+                    try:
+                        resource = metadata.resources[0]
+                        uri = resource.uri
+                        album_art = next((favorite for favorite in state.favorites if favorite.get("uri") == uri), None).get("album_art")
+                    except Exception as e:
+                        logger.debug(f"Failed to find album art for URI: {uri}")
+                        logger.debug(f"Error: {e}")
+                        pass
 
                     if metadata and hasattr(metadata, "title") and hasattr(metadata, "creator"):
                         title = metadata.title
@@ -140,12 +155,20 @@ async def _subscribe_to_device_events(device) -> None:
                                 )
                             except Exception as e:
                                 logger.debug(f"Failed to build album art URI for radio: {e}")
+                                
+                    if title == "ZPSTR_BUFFERING":
+                        title = None
 
                     track_info = {
                         "title": title,
                         "artist": artist,
                         "album_art": album_art,
                     }
+                    
+                    if current_transport_actions:
+                        track_info["actions"] = parse_transport_actions(current_transport_actions)
+                    else:
+                        track_info["actions"] = state.track_info.get("actions")
 
                     state.track_info = track_info
                     state.playback_state = transport_state
@@ -174,7 +197,6 @@ async def _subscribe_to_device_events(device) -> None:
                 await asyncio.sleep(delay)
             else:
                 logger.error(f"Failed to subscribe to {device_name} after {MAX_SUBSCRIPTION_RETRIES} attempts")
-
 
 async def _unsubscribe_from_all_devices(stop_listener: bool = True) -> None:
     """Unsubscribe from all device events and optionally stop event listener"""
@@ -207,7 +229,7 @@ async def _unsubscribe_from_all_devices(stop_listener: bool = True) -> None:
             timeout=3.0
         )
     except (asyncio.TimeoutError, Exception):
-        pass  # Suppress all exceptions during shutdown
+        pass  # Suppress all exceptions during shutdown 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -217,7 +239,15 @@ async def lifespan(app: FastAPI):
     logger.info("Starting TuneHub server...")
     manager = ConnectionManager()
     state = StateManager(manager)
-    
+    dial: Dial = None
+    config = Config()
+
+    try:
+        dial = Dial(bus_num=config.dial_i2c_bus, address=config.dial_i2c_address) 
+    except Exception as e:
+        logger.error(f"Failed to initialize dial: {e}")
+        dial = None
+
     # Discover devices and subscribe to events
     try:
         devices = await _discover_devices_async()
@@ -227,6 +257,12 @@ async def lifespan(app: FastAPI):
         logger.info(f"Discovered {len(devices)} device(s)")
     except Exception as e:
         logger.error(f"Error during startup: {e}")
+
+
+    if dial:
+        logger.info(f"Using address {hex(config.dial_i2c_address)} on bus {config.dial_i2c_bus} for volume dial")
+        dial.register_callback(lambda delta: state.active_device.set_relative_volume(delta) if state.active_device else None)
+        asyncio.create_task(dial.start())
     
     yield
     
@@ -263,8 +299,10 @@ async def websocket_endpoint(ws: WebSocket):
     logger.info(f"Client connected. Active connections: {len(manager.active_connections)}")
 
     if state.active_device:
-        state.favorites = get_playable_favorites(state.active_device)
-        state.playback_state = state.active_device.get_current_transport_info().get("current_transport_state") 
+        sources = Sources(state.active_device)
+        state.favorites = sources.get_sources()
+        
+        state.playback_state = state.active_device.get_current_transport_info().get("current_transport_state")
         await _subscribe_to_device_events(state.active_device)
 
     try:
