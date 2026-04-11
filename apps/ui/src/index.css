@@ -1,31 +1,66 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
 @import "tailwindcss";
 
 @theme {
-	--animate-play: playAnim;
-	--font-roboto: 'Roboto', sans-serif;
+  --animate-play: playAnim;
+  --font-roboto: "Roboto", sans-serif;
 
-	@keyframes playAnim {
-		0% { transform: scaleY(0.2) }
-		10% { transform: scaleY(0.9) }
-		30% { transform: scaleY(0.3) }
-		50% { transform: scaleY(1.0) }
-		70% { transform: scaleY(0.25) }
-		100% { transform: scaleY(0.2) }
-	}
+  @keyframes playAnim {
+    0% {
+      transform: scaleY(0.2);
+    }
+    10% {
+      transform: scaleY(0.9);
+    }
+    30% {
+      transform: scaleY(0.3);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+    70% {
+      transform: scaleY(0.25);
+    }
+    100% {
+      transform: scaleY(0.2);
+    }
+  }
 
-	--animate-idle: idlePulse;
-	@keyframes idlePulse {
-		0% { transform: scaleY(0.35) }
-		50% { transform: scaleY(0.36) }
-		100% { transform: scaleY(0.35) }
-	}
+  --animate-idle: idlePulse;
+  @keyframes idlePulse {
+    0% {
+      transform: scaleY(0.35);
+    }
+    50% {
+      transform: scaleY(0.36);
+    }
+    100% {
+      transform: scaleY(0.35);
+    }
+  }
 
-	@keyframes mask-up {
-		to {
-			mask-size: 100% 120px, 100% 100%;
-		}
-	}
+  @keyframes mask-up {
+    to {
+      mask-size:
+        100% 120px,
+        100% 100%;
+    }
+  }
+
+  @keyframes marquee {
+    0%,
+    10% {
+      transform: translateX(0);
+    }
+    45%,
+    55% {
+      transform: translateX(var(--overflow));
+    }
+    90%,
+    100% {
+      transform: translateX(0);
+    }
+  }
 }
 
 @layer utilities {
@@ -36,18 +71,20 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-	.no-select {
-		-webkit-touch-callout: none;
+  .no-select {
+    -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-	}
+  }
+
 }
 
 @layer base {
-	html, body {
-		overscroll-behavior-x: none;
-	}
+  html,
+  body {
+    overscroll-behavior-x: none;
+  }
 }
