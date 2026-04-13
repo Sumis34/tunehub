@@ -3,6 +3,7 @@ title = "Tunehub Static Configuration"
 [dial]
 i2c_address = 0x12
 i2c_bus = 4
+sensitivity = 1
 
 [[sources.native]]
 title = "SRF 1"

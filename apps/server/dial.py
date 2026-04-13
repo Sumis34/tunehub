@@ -24,7 +24,7 @@ class DialData:
 class Dial:
     """Reads rotary delta and button state over I2C via a packed struct."""
 
-    def __init__(self, bus_num: int, address: int, poll_interval: float = 0.05):
+    def __init__(self, bus_num: int, address: int, poll_interval: float = 0.05, sensitivity: int = 1):
         if SMBus is None:
             raise ImportError("smbus2 is not available")
 
@@ -33,13 +33,14 @@ class Dial:
         self.poll_interval = poll_interval
         self._callbacks = []
         self._connected = False
+        self.sensitivity = sensitivity
 
     def read(self) -> DialData | None:
         try:
             raw = self.bus.read_i2c_block_data(self.address, 0, STRUCT_SIZE)
             delta, button = struct.unpack(STRUCT_FORMAT, bytes(raw))
             
-            if delta > MAX_DELTA:
+            if delta not in range(-MAX_DELTA, MAX_DELTA + 1):
                 logger.warning(f"Received delta {delta} exceeds max of {MAX_DELTA}, ignoring")
                 return None
             
@@ -47,7 +48,7 @@ class Dial:
                 logger.info(f"Dial reconnected at {hex(self.address)}")
                 self._connected = True
             
-            return DialData(delta=delta, button=bool(button))
+            return DialData(delta=delta * self.sensitivity, button=bool(button))
         except OSError as e:
             if self._connected:
                 logger.warning(f"Dial lost at {hex(self.address)}: {e}")

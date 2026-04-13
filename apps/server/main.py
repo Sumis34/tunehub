@@ -243,7 +243,7 @@ async def lifespan(app: FastAPI):
     config = Config()
 
     try:
-        dial = Dial(bus_num=config.dial_i2c_bus, address=config.dial_i2c_address) 
+        dial = Dial(bus_num=config.dial_i2c_bus, address=config.dial_i2c_address, sensitivity=config.dial_sensitivity)
     except Exception as e:
         logger.error(f"Failed to initialize dial: {e}")
         dial = None
