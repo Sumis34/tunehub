@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import ColorThief from "colorthief";
-import { LucidePause, LucidePlay, LucideSkipForward } from "lucide-react";
+import { LucidePause, LucidePlay } from "lucide-react";
 import { usePlayer } from "../../hooks/use-player";
 import NoDeviceSelected from "../../context/no-deivce-selected";
 import { useQuickMenu } from "../../hooks/use-quick-menu";
+import { Next, Previous } from "../../components/icons";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
@@ -134,9 +135,9 @@ function RouteComponent() {
             <button
               onClick={() => skipBackward()}
               disabled={currentTrack.track_info?.actions?.previous === false}
-              className="disabled:opacity-0"
+              className="disabled:opacity-20"
             >
-              <LucideSkipForward className="fill-neutral-500 stroke-neutral-500 size-6 rotate-180" />
+              <Previous className="fill-neutral-500 stroke-neutral-500 size-6" />
             </button>
             <button
               onClick={() => togglePlaybackState()}
@@ -152,9 +153,9 @@ function RouteComponent() {
             <button
               onClick={() => skipForward()}
               disabled={currentTrack.track_info?.actions?.next === false}
-              className="disabled:opacity-0"
+              className="disabled:opacity-20"
             >
-              <LucideSkipForward className="fill-neutral-500 stroke-neutral-500 size-6" />
+              <Next className="fill-neutral-500 stroke-neutral-500 size-6" />
             </button>
           </div>
         </div>
