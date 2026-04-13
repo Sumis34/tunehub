@@ -5,10 +5,15 @@ try:
     from smbus2 import SMBus
 except ImportError:
     SMBus = None
+    
+import logging
+ 
+logger = logging.getLogger(__name__)
 
 # Matches ESP32 struct: int16_t delta, uint8_t button
 STRUCT_FORMAT = '<hB'
 STRUCT_SIZE = struct.calcsize(STRUCT_FORMAT)  # 3 bytes
+MAX_DELTA = 5
 
 
 class DialData:
@@ -27,13 +32,26 @@ class Dial:
         self.address = address
         self.poll_interval = poll_interval
         self._callbacks = []
+        self._connected = False
 
     def read(self) -> DialData | None:
         try:
             raw = self.bus.read_i2c_block_data(self.address, 0, STRUCT_SIZE)
             delta, button = struct.unpack(STRUCT_FORMAT, bytes(raw))
+            
+            if delta > MAX_DELTA:
+                logger.warning(f"Received delta {delta} exceeds max of {MAX_DELTA}, ignoring")
+                return None
+            
+            if not self._connected:
+                logger.info(f"Dial reconnected at {hex(self.address)}")
+                self._connected = True
+            
             return DialData(delta=delta, button=bool(button))
-        except OSError:
+        except OSError as e:
+            if self._connected:
+                logger.warning(f"Dial lost at {hex(self.address)}: {e}")
+                self._connected = False
             return None
 
     def register_callback(self, callback):
