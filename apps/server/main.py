@@ -261,7 +261,7 @@ async def lifespan(app: FastAPI):
 
     if dial:
         logger.info(f"Using address {hex(config.dial_i2c_address)} on bus {config.dial_i2c_bus} for volume dial")
-        dial.register_callback(lambda delta: state.active_device.set_relative_volume(delta) if state.active_device else None)
+        dial.register_callback(lambda data: state.active_device.set_relative_volume(data.delta) if state.active_device else None)
         asyncio.create_task(dial.start())
     
     yield
