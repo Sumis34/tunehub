@@ -3,7 +3,7 @@
 
 const uint8_t DI_ENCODER_A = 36;
 const uint8_t DI_ENCODER_B = 39;
-const uint8_t DI_BUTTON    = 32;
+const uint8_t DI_BUTTON    = 33;
 
 RotaryEncoder dial(DI_ENCODER_A, DI_ENCODER_B);
 
@@ -23,7 +23,9 @@ void knobCallback(int16_t value) {
   Serial.print("knobCallback value=");
   Serial.print(value);
   Serial.print(" delta=");
-  Serial.println(stepDelta);
+  Serial.print(stepDelta);
+  Serial.print(" button=");
+  Serial.println(state.button);
 }
 
 void requestEvent() {
@@ -32,12 +34,19 @@ void requestEvent() {
   state.button = 0;
 }
 
+void IRAM_ATTR buttonISR() {
+  state.button = 1;
+}
+
 void setup() {
   Serial.begin(115200);
 
   dial.onTurned(&knobCallback);
   dial.setBoundaries(INT16_MIN, INT16_MAX, false);
   dial.begin();
+
+  pinMode(DI_BUTTON, INPUT_PULLUP);
+  attachInterrupt(DI_BUTTON, buttonISR, FALLING);
 
   Wire.begin(0x12);
   Wire.onRequest(requestEvent);

@@ -12,7 +12,7 @@ from state import StateManager
 from connection import ConnectionManager, Action
 from handlers import dispatch_action
 from connection import Event
-from dial import Dial
+from dial import Dial, DialData
 from config import Config
 from sources import Sources
 
@@ -229,7 +229,18 @@ async def _unsubscribe_from_all_devices(stop_listener: bool = True) -> None:
             timeout=3.0
         )
     except (asyncio.TimeoutError, Exception):
-        pass  # Suppress all exceptions during shutdown 
+        pass  # Suppress all exceptions during shutdown
+    
+def on_dial_event(data: DialData):
+    if state.active_device == None:
+        logger.warning("No active device to set volume for")
+        return
+    
+    if data.button == 1:
+        logger.info("Dial button pressed, toggling mute")
+        state.active_device.set_mute(not state.active_device.get_mute())
+    
+    state.active_device.set_relative_volume(data.delta) 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -261,7 +272,7 @@ async def lifespan(app: FastAPI):
 
     if dial:
         logger.info(f"Using address {hex(config.dial_i2c_address)} on bus {config.dial_i2c_bus} for volume dial")
-        dial.register_callback(lambda data: state.active_device.set_relative_volume(data.delta) if state.active_device else None)
+        dial.register_callback(on_dial_event)
         asyncio.create_task(dial.start())
     
     yield
