@@ -241,7 +241,7 @@ def on_dial_event(data: DialData):
         playback_state = state.active_device.get_current_transport_info().get("current_transport_state")
         if playback_state == "PLAYING":
             state.active_device.pause()
-        elif playback_state == "PAUSED":
+        elif playback_state == "PAUSED_PLAYBACK":
             state.active_device.play()
     
     state.active_device.set_relative_volume(data.delta) 
