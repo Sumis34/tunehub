@@ -48,7 +48,7 @@ class Dial:
                 logger.info(f"Dial reconnected at {hex(self.address)}")
                 self._connected = True
             
-            return DialData(delta=delta * self.sensitivity, button=bool(button))
+            return DialData(delta=delta * self.sensitivity, button=bool(button == 128))
         except OSError as e:
             if self._connected:
                 logger.warning(f"Dial lost at {hex(self.address)}: {e}")

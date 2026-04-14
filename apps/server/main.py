@@ -238,9 +238,10 @@ def on_dial_event(data: DialData):
     
     if data.button == 1:
         logger.info("Dial button pressed, toggling pause")
-        if state.active_device.get_current_transport_info().get("current_transport_state") == "PLAYING":
+        playback_state = state.active_device.get_current_transport_info().get("current_transport_state")
+        if playback_state == "PLAYING":
             state.active_device.pause()
-        else:
+        elif playback_state == "PAUSED":
             state.active_device.play()
     
     state.active_device.set_relative_volume(data.delta) 

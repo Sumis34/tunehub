@@ -35,7 +35,8 @@ void requestEvent() {
 }
 
 void IRAM_ATTR buttonISR() {
-  state.button = 1;
+  // Use 128 to indicate `true` because it is more specific then 1 and is thus less likely to be confused with I2C noise.
+  state.button = 128;
 }
 
 void setup() {
