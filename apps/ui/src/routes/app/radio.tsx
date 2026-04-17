@@ -116,10 +116,10 @@ function RouteComponent() {
                   });
                 }}
                 key={id}
-                className="px-2 py-4 active:bg-neutral-800 text-neutral-100 truncate transition-all w-full text-left"
+                className="px-2 py-4 active:bg-neutral-800 text-neutral-100 transition-all w-full text-left"
               >
                 <div className="truncate text-xl">{name}</div>
-                <span className="text-lg text-neutral-500">{desc}</span>
+                <div className="text-lg text-neutral-500 truncate">{desc}</div>
               </button>
             ))}
           </div>
