@@ -107,7 +107,7 @@ function RouteComponent() {
           />
         </div>
         <div className="col-span-1 bg-neutral-900 rounded-lg overflow-y-auto mask-exclude masked-overflow no-scrollbar">
-          <div className="divide-neutral-800 divide-y">
+          <div className="">
             {favorites.map(([name, id, desc]) => (
               <button
                 onClick={() => {
