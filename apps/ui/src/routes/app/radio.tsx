@@ -131,29 +131,31 @@ function RouteComponent() {
           <h2 className="text-2xl text-neutral-500">{artist}</h2>
         </div>
         <div className="col-span-1 flex items-center justify-around">
-          <div className="flex gap-3">
+          <div className="flex gap-1">
             <button
               onClick={() => skipBackward()}
               disabled={currentTrack.track_info?.actions?.previous === false}
-              className="disabled:opacity-20"
+              className="disabled:opacity-20 px-3 py-3"
             >
               <Previous className="fill-neutral-500 stroke-neutral-500 size-6" />
             </button>
             <button
               onClick={() => togglePlaybackState()}
-              className="bg-neutral-100 rounded-full p-3 active:scale-95 transition-transform"
+              className="group px-3 py-3"
               disabled={currentTrack.track_info?.actions?.play === false}
             >
-              {playbackState && playbackState.isPlaying ? (
-                <LucidePause className="fill-neutral-900 size-8" />
-              ) : (
-                <LucidePlay className="fill-neutral-900 size-8" />
-              )}
+              <div className="bg-neutral-100 rounded-full p-3 group-active:scale-95 transition-transform">
+                {playbackState && playbackState.isPlaying ? (
+                  <LucidePause className="fill-neutral-900 size-8" />
+                ) : (
+                  <LucidePlay className="fill-neutral-900 size-8" />
+                )}
+              </div>
             </button>
             <button
               onClick={() => skipForward()}
               disabled={currentTrack.track_info?.actions?.next === false}
-              className="disabled:opacity-20"
+              className="disabled:opacity-20 px-3 py-3"
             >
               <Next className="fill-neutral-500 stroke-neutral-500 size-6" />
             </button>
