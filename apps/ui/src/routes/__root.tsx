@@ -1,5 +1,5 @@
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+// import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useEffect } from "react";
 import { EventProvider } from "../context/player-provider";
 import { QuickMenuProvider } from "../context/quick-menu-provider";
@@ -42,7 +42,7 @@ const RootLayout = () => {
               <Outlet />
             </div>
           </div>
-          <TanStackRouterDevtools />
+          {/* <TanStackRouterDevtools /> */}
         </div>
       </EventProvider>
     </QuickMenuProvider>

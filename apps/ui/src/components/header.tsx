@@ -1,8 +1,10 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Settings2 } from "lucide-react";
+import { Home, Settings2, VolumeOff, WifiOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import useWeather from "../hooks/use-weather";
 import QuickMenu from "./quick-menu";
+import { usePlayer } from "../hooks/use-player";
+import useNetwork from "../hooks/use-network";
 const locale = import.meta.env.VITE_LOCALE || "de-CH";
 
 export default function Header() {
@@ -11,6 +13,8 @@ export default function Header() {
   const [time, setTime] = useState(new Date());
 
   const { temperature } = useWeather(47.0274, 7.74526);
+  const player = usePlayer();
+  const { isOnline } = useNetwork();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -39,7 +43,11 @@ export default function Header() {
           >
             {shortTimeFormatter.format(time)}
           </p>
-          <p className="flex justify-end items-center">
+          <p className="flex justify-end items-center gap-3">
+            {!isOnline && <WifiOff className="w-5 h-5 text-neutral-100" />}
+            {player.volume === 0 && (
+              <VolumeOff className="w-5 h-5 text-neutral-100" />
+            )}
             {location.pathname !== "/app/settings" ? (
               <Link to="/app/settings">
                 <Settings2 className="w-6 h-6 text-neutral-100" />
