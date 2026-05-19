@@ -1,4 +1,5 @@
 import { Slider } from "@base-ui-components/react";
+import { useSmoothValue } from "../hooks/use-smooth-value";
 
 export default function TouchSlider({
   onValueChange,
@@ -10,10 +11,11 @@ export default function TouchSlider({
   value?: number;
   icon?: React.ReactNode;
 }) {
+  const smoothValue = useSmoothValue(value || 0, { speed: 0.2 });
   return (
     <Slider.Root
       defaultValue={25}
-      value={value}
+      value={smoothValue}
       min={10}
       max={100}
       step={1}
