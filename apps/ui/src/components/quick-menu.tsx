@@ -155,6 +155,7 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
                               changeVolume(0);
                             }
                           }}
+                          className="p-8 -m-8"
                         >
                           {volume === 0 && (
                             <VolumeOff className="h-6 w-6 m-auto" />
