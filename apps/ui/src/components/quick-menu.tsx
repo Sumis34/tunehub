@@ -9,7 +9,7 @@ import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Button from "../ui/button";
 import { useNavigate } from "@tanstack/react-router";
-import { MoonStar, Speaker, Volume2, Sliders } from "lucide-react";
+import { MoonStar, Speaker, Volume2, Sliders, VolumeOff } from "lucide-react";
 import TouchSlider from "./slider";
 import { usePlayer } from "../hooks/use-player";
 import { useQuickMenu } from "../hooks/use-quick-menu";
@@ -144,7 +144,25 @@ export default function QuickMenu({ children }: { children: React.ReactNode }) {
                   <TouchSlider
                     value={volume}
                     onValueChange={(val) => changeVolume(val)}
-                    icon={<Volume2 className="h-6 w-6 stroke-neutral-800" />}
+                    icon={
+                      <>
+                        <button
+                          onClick={() => {
+                            if (volume === 0) {
+                              // TODO: restore previous volume ur use actual mute functionality instead of setting volume to 0
+                              changeVolume(30);
+                            } else {
+                              changeVolume(0);
+                            }
+                          }}
+                        >
+                          {volume === 0 && (
+                            <VolumeOff className="h-6 w-6 m-auto" />
+                          )}
+                          {volume > 0 && <Volume2 className="h-6 w-6 m-auto" />}
+                        </button>
+                      </>
+                    }
                   />
                 </div>
               </div>

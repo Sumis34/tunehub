@@ -21,7 +21,7 @@ export default function TouchSlider({
       orientation="horizontal"
       className={"relative"}
     >
-      <div className="absolute inset-0 flex items-center justify-start px-2 pointer-events-none z-10">
+      <div className="absolute left-0 top-0 bottom-0 flex items-center justify-start px-2 z-10">
         {icon}
       </div>
       <Slider.Control>
