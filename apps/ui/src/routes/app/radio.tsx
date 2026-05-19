@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import ColorThief from "colorthief";
 import { LucidePause, LucidePlay } from "lucide-react";
@@ -33,6 +33,7 @@ function RouteComponent() {
   const imgRef = useRef<HTMLImageElement>(null);
   const prevVolume = useRef(volume);
   const coverArt = `${API_BASE}/proxy?url=${encodeURIComponent(currentTrack.track_info?.album_art || "")}`;
+  const navigate = useNavigate();
 
   const menu = useQuickMenu();
 
@@ -86,11 +87,19 @@ function RouteComponent() {
     <div className="flex-1 min-h-0 p-1 flex flex-col">
       <div className="grid grid-rows-1 grid-cols-3 flex-1 grow gap-1 min-h-0">
         <div
-          className="col-span-2 flex items-center justify-center rounded-lg transition-colors"
+          className="col-span-2 flex items-center justify-center rounded-lg transition-colors relative"
           style={{
             background: dominantColorValues ? bgColor : "transparent",
           }}
         >
+          <div className="absolute inset-0 p-3 z-10 flex items-start justify-start">
+            <button
+              onClick={() => navigate({ to: "/app/select-device" })}
+              className="rounded-full bg-neutral-500/30 px-2 py-1 font-semibold text-neutral-100"
+            >
+              {activeDevice.device_name}
+            </button>
+          </div>
           <img
             ref={imgRef}
             src={coverArt}
