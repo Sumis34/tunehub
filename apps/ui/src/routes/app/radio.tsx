@@ -1,11 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import ColorThief from "colorthief";
 import { LucidePause, LucidePlay } from "lucide-react";
 import { usePlayer } from "../../hooks/use-player";
 import NoDeviceSelected from "../../context/no-deivce-selected";
 import { useQuickMenu } from "../../hooks/use-quick-menu";
 import { Next, Previous } from "../../components/icons";
+import Carousel from "../../components/carousel";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
@@ -30,7 +30,6 @@ function RouteComponent() {
     skipForward,
   } = usePlayer();
 
-  const imgRef = useRef<HTMLImageElement>(null);
   const prevVolume = useRef(volume);
   const coverArt = `${API_BASE}/proxy?url=${encodeURIComponent(currentTrack.track_info?.album_art || "")}`;
   const navigate = useNavigate();
@@ -46,25 +45,7 @@ function RouteComponent() {
     prevVolume.current = volume;
   }, [volume, menu]);
 
-  const extractColor = () => {
-    if (!imgRef.current) return;
-
-    try {
-      const colorThief = new ColorThief();
-
-      if (imgRef.current.complete && imgRef.current.naturalWidth > 0) {
-        const color = colorThief.getColor(imgRef.current);
-        if (color && color.length === 3) {
-          setDominantColorValues(color);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to extract color:", error);
-      setDominantColorValues([64, 64, 64]);
-    }
-  };
-
-  const shadow = `0px 0px 50px 10px rgba(${dominantColorValues?.slice(0, 3).join(",")},0.5)`;
+  const shadow = `0px 0px 50px 10px rgba(${dominantColorValues?.slice(0, 3).join(",")},0.3)`;
   const bgColor = `rgba(${dominantColorValues?.join(",")})`;
 
   const title =
@@ -87,12 +68,13 @@ function RouteComponent() {
     <div className="flex-1 min-h-0 p-1 flex flex-col">
       <div className="grid grid-rows-1 grid-cols-3 flex-1 grow gap-1 min-h-0">
         <div
-          className="col-span-2 flex items-center justify-center rounded-lg transition-colors relative"
+          className="col-span-2 flex items-center justify-center rounded-lg transition-colors relative duration-300"
           style={{
             background: dominantColorValues ? bgColor : "transparent",
+            boxShadow: shadow,
           }}
         >
-          <div className="absolute inset-0 p-3 z-10 flex items-start justify-start">
+          <div className="absolute top-0 left-0 p-3 z-10 flex items-start justify-start">
             <button
               onClick={() => navigate({ to: "/app/select-device" })}
               className="rounded-full bg-neutral-500/30 px-2 py-1 font-semibold text-neutral-100"
@@ -100,19 +82,19 @@ function RouteComponent() {
               {activeDevice.device_name}
             </button>
           </div>
-          <img
-            ref={imgRef}
-            src={coverArt}
-            // src="https://marketplace.canva.com/EAGl2RBdUF0/1/0/1600w/canva-dark-blue-and-white-modern-lost-in-stars-album-cover-LkSUXx1d-Sw.jpg"
-            // src="https://cms-assets.tutsplus.com/cdn-cgi/image/width=360/uploads/users/114/posts/34296/final_image/Final-image.jpg"
-            alt="cover art"
-            className="rounded-md h-72 aspect-square"
-            crossOrigin="anonymous"
-            onLoad={extractColor}
-            onError={() => setDominantColorValues([64, 64, 64])}
-            style={{
-              boxShadow: shadow,
-            }}
+          <Carousel
+            onIndexChange={(_, c) => setDominantColorValues(c)}
+            items={[
+              {
+                image: coverArt,
+                alt: `${title} cover art`,
+              },
+              {
+                alt: "Default cover art",
+                image:
+                  "https://marketplace.canva.com/EAGl2RBdUF0/1/0/1600w/canva-dark-blue-and-white-modern-lost-in-stars-album-cover-LkSUXx1d-Sw.jpg",
+              },
+            ]}
           />
         </div>
         <div className="col-span-1 bg-neutral-900 rounded-lg overflow-y-auto mask-exclude masked-overflow no-scrollbar">
