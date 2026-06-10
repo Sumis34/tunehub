@@ -44,6 +44,11 @@ export default function Carousel({
 
     internalIndex.current = clamped;
 
+    // TODO: If this is added swiping stops working :(
+    // if (onIndexChange) {
+    //   onIndexChange(clamped, colors.current.get(clamped) ?? null);
+    // }
+
     animate(x, -clamped * containerWidth, {
       type: "spring",
       stiffness: 300,

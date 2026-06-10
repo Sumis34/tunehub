@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { LucidePause, LucidePlay } from "lucide-react";
 import { usePlayer } from "../../hooks/use-player";
 import NoDeviceSelected from "../../context/no-deivce-selected";
@@ -28,10 +28,12 @@ function RouteComponent() {
     volume,
     skipBackward,
     skipForward,
+    queue,
   } = usePlayer();
 
+  console.log(currentTrack);
+
   const prevVolume = useRef(volume);
-  const coverArt = `${API_BASE}/proxy?url=${encodeURIComponent(currentTrack.track_info?.album_art || "")}`;
   const navigate = useNavigate();
 
   const menu = useQuickMenu();
@@ -60,6 +62,13 @@ function RouteComponent() {
       ? currentTrack.track_info.artist
       : "Unknown Artist";
 
+  const onIndexChange = useCallback((index: number, color: number[] | null) => {
+    setDominantColorValues(color);
+    play({
+      queue_index: index,
+    });
+  }, [play]);
+
   if (!activeDevice?.device_name) {
     return <NoDeviceSelected />;
   }
@@ -83,18 +92,17 @@ function RouteComponent() {
             </button>
           </div>
           <Carousel
-            onIndexChange={(_, c) => setDominantColorValues(c)}
-            items={[
-              {
-                image: coverArt,
-                alt: `${title} cover art`,
-              },
-              {
-                alt: "Default cover art",
-                image:
-                  "https://marketplace.canva.com/EAGl2RBdUF0/1/0/1600w/canva-dark-blue-and-white-modern-lost-in-stars-album-cover-LkSUXx1d-Sw.jpg",
-              },
-            ]}
+            onIndexChange={(index, color) => onIndexChange(index, color)}
+            items={queue.map((item) => ({
+              image: `${API_BASE}/proxy?url=${encodeURIComponent(item?.album_art || "")}`,
+              alt: `${item?.title} - ${item?.artist}`,
+            }))}
+            // TODO: not working with non queue tracks (e.g. radio mode)
+            activeIndex={
+              currentTrack.track_info?.queue_index
+                ? currentTrack.track_info.queue_index - 1
+                : 0
+            }
           />
         </div>
         <div className="col-span-1 bg-neutral-900 rounded-lg overflow-y-auto mask-exclude masked-overflow no-scrollbar">

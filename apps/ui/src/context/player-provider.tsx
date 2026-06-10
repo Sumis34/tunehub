@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { PlayerContext, type PlayerContextValue } from "./player-context";
+import { PlayerContext, type PlayerContextValue, type PlayProps } from "./player-context";
 import useWebSocket from "react-use-websocket";
 import { useDebouncedCallback } from "../hooks/use-debounce";
 
@@ -26,19 +26,19 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
+  const [queue, setQueue] = useState<PlayerContextValue["queue"]>([]);
+
   const [playbackState, setPlaybackState] = useState<
     PlayerContextValue["playbackState"]
   >({ isPlaying: false });
 
   const [lastEventTime, setLastEventTime] = useState<Date>(new Date());
 
-  const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket<SocketEvent>(
-    SOCKET_URL,
-    {
+  const { sendJsonMessage, lastJsonMessage, readyState } =
+    useWebSocket<SocketEvent>(SOCKET_URL, {
       share: true,
       shouldReconnect: () => true,
-    }
-  );
+    });
 
   useEffect(() => {
     if (!lastJsonMessage) return;
@@ -71,6 +71,9 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
       case "favorites":
         setFavorites(lastJsonMessage.data as PlayerContextValue["favorites"]);
         break;
+      case "queue":
+        setQueue(lastJsonMessage.data as PlayerContextValue["queue"]);
+        break;
       default:
         console.log("Unknown event: ", lastJsonMessage);
         break;
@@ -80,11 +83,18 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
   }, [lastJsonMessage]);
 
   const play = useCallback(
-    ({ favorite_id }: { favorite_id: string }) => {
+    (props: PlayProps) => {
+
+      const favorite_id =
+        "favorite_id" in props ? props.favorite_id : undefined;
+      const queue_index =
+        "queue_index" in props ? props.queue_index : undefined;
+
       sendJsonMessage({
         type: "play",
         data: {
           favorite_id: favorite_id,
+          queue_index: queue_index,
         },
       });
     },
@@ -174,6 +184,7 @@ export function EventProvider({ children }: { children: React.ReactNode }) {
         isConnected,
         skipForward,
         skipBackward,
+        queue,
       }}
     >
       {children}

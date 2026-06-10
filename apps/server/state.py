@@ -12,6 +12,7 @@ class EventTypes(Enum):
     ACTIVE_DEVICE = "active-device"
     FAVORITES = "favorites"
     PLAYBACK_STATE = "playback-state"
+    QUEUE = "queue"
 
 class StateManager:
     def __init__(self, cm: ConnectionManager):
@@ -22,6 +23,7 @@ class StateManager:
         self._track_info: dict = {"title": None, "artist": None, "album_art": None}
         self._connection_manager: ConnectionManager = cm
         self._playback_state = ""
+        self._queue: List[dict] = []
         self.event_names = EventTypes
 
     @property
@@ -67,6 +69,17 @@ class StateManager:
         """Set favorites and auto-sync"""
         self._favorites = value
         self._trigger_sync(self.event_names.FAVORITES.value, self.sync_favorites)
+        
+    @property
+    def queue(self) -> List[dict]:
+        """Get current queue"""
+        return self._queue
+    
+    @queue.setter
+    def queue(self, value: List[dict]):
+        """Set current queue and auto-sync"""
+        self._queue = value
+        self._trigger_sync(self.event_names.QUEUE.value, self.sync_queue)
 
     @property
     def track_info(self) -> dict:
@@ -149,6 +162,22 @@ class StateManager:
             await self._connection_manager.broadcast(
                 Event(type="play", data={"track_info": self._track_info})
             )
+            
+    async def sync_queue(self):
+        """Sync current queue to all clients"""
+        if self._connection_manager:
+            tracks =[
+                {
+                    "title": track.title,
+                    "artist": track.creator,
+                    "album_art": self.active_device.music_library.build_album_art_full_uri(
+                                    track.album_art_uri
+                                ) if track.album_art_uri else None
+                } for track in self._queue
+            ]
+            await self._connection_manager.broadcast(
+                Event(type=self.event_names.QUEUE.value, data=tracks)
+            )
 
     async def sync_all(self):
         """Sync all state values to all clients"""
@@ -158,3 +187,4 @@ class StateManager:
         await self.sync_favorites()
         await self.sync_track_info()
         await self.sync_playback_state()
+        await self.sync_queue()

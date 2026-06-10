@@ -4,6 +4,7 @@ export type TrackInfo = {
   title: string | null;
   artist: string | null;
   album_art: string | null;
+  queue_index?: number;
   actions?: {
     play: boolean;
     pause: boolean;
@@ -14,12 +15,15 @@ export type TrackInfo = {
   };
 };
 
+export type PlayProps = {} & ({ favorite_id: string } | { queue_index: number });
+
 export type PlayerContextValue = {
   volume: number;
   devices: string[];
   activeDevice?: { device_name: string };
   favorites: Array<[string, string, string, string]>;
   playbackState: { isPlaying: boolean };
+  queue: TrackInfo[];
   lastEventTime: Date;
   currentTrack: {
     favorite_id?: string;
@@ -28,7 +32,7 @@ export type PlayerContextValue = {
   isConnected: boolean;
   changeActiveDevice: (deviceName: string) => void;
   togglePlaybackState: () => void;
-  play: ({ favorite_id }: { favorite_id: string }) => void;
+  play: (props: PlayProps) => void;
   changeVolume: (volume: number) => void;
   stopServer: () => void;
   scanDevices: () => void;

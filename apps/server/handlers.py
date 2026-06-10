@@ -2,7 +2,7 @@
 import logging
 from state import StateManager
 from connection import ConnectionManager, Event
-from sonos import play_favorite, get_playable_favorites, discover
+from sonos import play_favorite, discover
 import sys
 from sources import Sources
 
@@ -42,6 +42,7 @@ async def handle_active_device(manager: ConnectionManager, ws, state: StateManag
 async def handle_play(manager: ConnectionManager, ws, state: StateManager, data: dict):
     """Handle play favorite action"""
     favorite_id = data.get("favorite_id")
+    queue_index = data.get("queue_index")
 
     if state.active_device and favorite_id:
         favorite = next(
@@ -53,6 +54,8 @@ async def handle_play(manager: ConnectionManager, ws, state: StateManager, data:
             )
             return
         play_favorite(state.active_device, favorite)
+    elif state.active_device and queue_index:
+        state.active_device.play_from_queue(queue_index)
     else:
         await manager.send_event(
             Event(type="error", data={"message": "No active device or favorite ID"}), ws

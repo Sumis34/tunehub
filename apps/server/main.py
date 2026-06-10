@@ -158,11 +158,12 @@ async def _subscribe_to_device_events(device) -> None:
                                 
                     if title == "ZPSTR_BUFFERING":
                         title = None
-
+                    
                     track_info = {
                         "title": title,
                         "artist": artist,
                         "album_art": album_art,
+                        "queue_index" : event.variables.get("current_track")
                     }
                     
                     if current_transport_actions:
@@ -172,6 +173,8 @@ async def _subscribe_to_device_events(device) -> None:
 
                     state.track_info = track_info
                     state.playback_state = transport_state
+                    
+                    state.queue = device.get_queue()
 
                 except Exception as e:
                     logger.error(f"Error handling transport event from {device_name}: {e}")
